@@ -23,16 +23,6 @@ type Room struct {
 	PricePerMonth *float64 `json:"price_per_month,omitempty"`
 	Status        string   `json:"status"` // "available" or "booked"
 }
-type Review struct {
-	ID         int       `json:"id"`
-	RoomID     int       `json:"room_id"`
-	RoomNumber int       `json:"room_number"`
-	UserID     int       `json:"user_id"`
-	UserEmail  string    `json:"email"`
-	Rating     int       `json:"rating"`
-	Comment    *string   `json:"comment,omitempty"`
-	CreatedAt  time.Time `json:"created_at"`
-}
 type Complaint struct {
 	ID          int       `json:"id"`
 	RoomID      int       `json:"room_id"`
@@ -44,12 +34,15 @@ type Complaint struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 type Booking struct {
-	ID        int       `json:"id"`
-	UserID    int       `json:"user_id"`
-	RoomID    int       `json:"room_id"`
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
-	Status    string    `json:"status"` // "pending", "confirmed", "canceled"
+	ID         int       `json:"id"`
+	UserID     int       `json:"user_id"`
+	UserEmail  string    `json:"email"`
+	RoomID     int       `json:"room_id"`
+	RoomNumber int       `json:"room_number"`
+	StartDate  time.Time `json:"start_date"`
+	EndDate    time.Time `json:"end_date"`
+	Status     string    `json:"status"` // "pending", "confirmed", "canceled"
+	CreatedAt time.Time `json:"created_at"`
 }
 type Payment struct {
 	ID        int       `json:"id"`
@@ -58,4 +51,5 @@ type Payment struct {
 	Method    string    `json:"method"` // "credit_card", "paypal", "cash"
 	Status    string    `json:"status"` // "pending", "completed", "failed"
 	CreatedAt time.Time `json:"created_at"`
+	Booking   *Booking 	`json:"booking,omitempty"`
 }

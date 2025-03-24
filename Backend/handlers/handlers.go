@@ -92,7 +92,7 @@ func (h *Handler) GetDetailRoom(c *gin.Context) {
 	c.JSON(http.StatusOK, room)
 }
 
-func (h *Handler) UpdateRoom(c *gin.Context) {
+func (h *Handler) UpdateRoomPrice(c *gin.Context) {
 	id := c.Param("id")
 
 	var room models.Room
@@ -103,9 +103,9 @@ func (h *Handler) UpdateRoom(c *gin.Context) {
 
 	result, err := h.DB.Exec(context.Background(), `
 		UPDATE rooms 
-		SET price_per_day = $1, price_per_month = $2, status = $3 
-		WHERE id = $4`, 
-		room.PricePerDay, room.PricePerMonth, room.Status, id)
+		SET price_per_day = $1, price_per_month = $2 
+		WHERE id = $3`, 
+		room.PricePerDay, room.PricePerMonth, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -224,10 +224,10 @@ func (h *Handler) UpdatePassword(c *gin.Context) {
 // Handler for complaints
 func (h *Handler) GetAllComplaints(c *gin.Context) {
 	rows, err := h.DB.Query(context.Background(),
-		`SELECT r.id, r.room_id, rm.room_number, r.user_id, u.email, r.description, r.status, r.created_at
-		FROM complaints r
-		INNER JOIN rooms rm ON r.room_id = rm.id
-		INNER JOIN users u ON r.user_id = u.id`)
+		`SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		FROM complaints c
+		INNER JOIN rooms rm ON c.room_id = rm.id
+		INNER JOIN users u ON c.user_id = u.id`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,gin.H{"error": err.Error()})
 		return
@@ -247,16 +247,31 @@ func (h *Handler) GetAllComplaints(c *gin.Context) {
 }
 func (h *Handler) GetDetailComplaint(c *gin.Context) {
 	id := c.Param("id")
+	roomNumber := c.Query("room_number")
 	var complaint models.Complaint
-	err := h.DB.QueryRow(context.Background(), `
-		SELECT r.id, r.room_id, rm.room_number, r.user_id, u.email, r.description, r.status, r.created_at
-		FROM complaints r
-		INNER JOIN rooms rm ON r.room_id = rm.id
-		INNER JOIN users u ON r.user_id = u.id
-		WHERE r.id = $1`, id).Scan(
+	var err error
+	if roomNumber != "" {
+		err = h.DB.QueryRow(context.Background(), `
+		SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		FROM complaints c
+		INNER JOIN rooms rm ON c.room_id = rm.id
+		INNER JOIN users u ON c.user_id = u.id
+		WHERE c.id = $1`, roomNumber).Scan(
 		&complaint.ID, &complaint.RoomID, &complaint.RoomNumber, &complaint.UserID, &complaint.UserEmail,
 		&complaint.Description, &complaint.Status, &complaint.CreatedAt,
-	)
+		)
+	}else{
+		err = h.DB.QueryRow(context.Background(), `
+		SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		FROM complaints c
+		INNER JOIN rooms rm ON c.room_id = rm.id
+		INNER JOIN users u ON c.user_id = u.id
+		WHERE c.id = $1`, id).Scan(
+		&complaint.ID, &complaint.RoomID, &complaint.RoomNumber, &complaint.UserID, &complaint.UserEmail,
+		&complaint.Description, &complaint.Status, &complaint.CreatedAt,
+		)
+	}
+	
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Complain not found"})
 		return
@@ -354,4 +369,316 @@ func (h *Handler) DeleteComplaint(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Complaint deleted successfully"})
 }
+// handlers for bookings
+func (h *Handler) GetAllBookings(c *gin.Context) {
+	rows, err := h.DB.Query(context.Background(),
+		`SELECT b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status,b.created_at
+		FROM bookings b
+		INNER JOIN rooms rm ON b.room_id = rm.id
+		INNER JOIN users u ON b.user_id = u.id`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError,gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+	var bookings []models.Booking
+	for rows.Next(){
+		var booking models.Booking
+		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber, 
+			&booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status, &booking.CreatedAt); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		bookings = append(bookings, booking)
+	}
+	c.JSON(http.StatusOK, bookings)
+}
+func (h *Handler) GetDetailBookings(c *gin.Context) {
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+
+	query := `
+		SELECT b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status, b.created_at
+		FROM bookings b
+		INNER JOIN rooms rm ON b.room_id = rm.id
+		INNER JOIN users u ON b.user_id = u.id
+	`
+	var args []interface{}
+	if startDate != "" && endDate != "" {
+		query += " WHERE b.start_date >= $1 AND b.end_date <= $2"
+		args = append(args, startDate, endDate)
+	}
+
+	rows, err := h.DB.Query(context.Background(), query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var bookings []models.Booking
+	for rows.Next() {
+		var booking models.Booking
+		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber,
+			&booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status, &booking.CreatedAt); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		bookings = append(bookings, booking)
+	}
+	c.JSON(http.StatusOK, bookings)
+}
+func (h *Handler) CreateBooking(c *gin.Context) {
+	var booking models.Booking
+	if err := c.ShouldBindJSON(&booking); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.DB.QueryRow(context.Background(), `
+		INSERT INTO bookings (room_id, user_id, start_date, end_date, created_at)
+		VALUES ($1, $2, $3, $4, NOW())
+		RETURNING id`,
+		booking.RoomID, booking.UserID, booking.StartDate, booking.EndDate).Scan(&booking.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Booking created successfully", "booking_id": booking.ID})
+}
+// func (h *Handler) UpdateBookingStatus(c *gin.Context) {
+// 	id := c.Param("id")
+// 	var booking models.Booking
+
+// 	if err := c.ShouldBindJSON(&booking); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	result, err := h.DB.Exec(context.Background(), `
+// 		UPDATE bookings 
+// 		SET status = $1 
+// 		WHERE id = $2`, booking.Status, id)
+
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// 		return
+// 	}
+
+// 	if result.RowsAffected() == 0 {
+// 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusOK, gin.H{"message": "Booking updated successfully"})
+// }
+func (h *Handler) DeleteBooking(c *gin.Context) {
+	id := c.Param("id")
+
+	result, err := h.DB.Exec(context.Background(), "DELETE FROM bookings WHERE id = $1", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Booking deleted successfully"})
+}
+
+//Handler for payments
+func (h *Handler) GetAllPayments(c *gin.Context) {
+	rows, err := h.DB.Query(context.Background(), `
+		SELECT p.id, p.booking_id, p.amount, p.method, p.status, p.created_at,
+		       b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status
+		FROM payments p
+		INNER JOIN bookings b ON p.booking_id = b.id
+		INNER JOIN rooms rm ON b.room_id = rm.id
+		INNER JOIN users u ON b.user_id = u.id
+	`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var payments []models.Payment
+	for rows.Next() {
+		var payment models.Payment
+		var booking models.Booking
+
+		if err := rows.Scan(&payment.ID, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
+			&booking.ID, &booking.RoomID, &booking.RoomNumber, &booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		payment.Booking = &booking
+		payments = append(payments, payment)
+	}
+
+	c.JSON(http.StatusOK, payments)
+}
+func (h *Handler) GetPaymentDetail(c *gin.Context) {
+	id := c.Param("id")
+	status := c.Query("status") 
+
+	query := `
+		SELECT p.id, p.booking_id, p.amount, p.method, p.status, p.created_at,
+		       b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status
+		FROM payments p
+		INNER JOIN bookings b ON p.booking_id = b.id
+		INNER JOIN rooms rm ON b.room_id = rm.id
+		INNER JOIN users u ON b.user_id = u.id
+		WHERE p.id = $1`
+
+	args := []interface{}{id}
+
+	if status != "" {
+		query += " AND p.status = $2"
+		args = append(args, status)
+	}
+
+	var payment models.Payment
+	var booking models.Booking
+
+	err := h.DB.QueryRow(context.Background(), query, args...).Scan(
+		&payment.ID, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
+		&booking.ID, &booking.RoomID, &booking.RoomNumber, &booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
+		return
+	}
+
+	payment.Booking = &booking
+	c.JSON(http.StatusOK, payment)
+}
+func (h *Handler) CreatePayment(c *gin.Context) {
+	var payment models.Payment
+
+	if err := c.ShouldBindJSON(&payment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.DB.QueryRow(context.Background(), `
+		INSERT INTO payments (booking_id, amount, method, created_at)
+		VALUES ($1, $2, "Virtual Account", NOW())
+		RETURNING id`, payment.BookingID, payment.Amount).Scan(&payment.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Payment created successfully", "payment_id": payment.ID})
+}
+func (h *Handler) DeletePayment(c *gin.Context) {
+	id := c.Param("id")
+
+	result, err := h.DB.Exec(context.Background(), "DELETE FROM payments WHERE id = $1", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment deleted successfully"})
+}
+func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
+	id := c.Param("id")
+	var req struct {
+		Status string `json:"status"`
+	}
+
+	// Bind JSON request
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Start transaction
+	tx, err := h.DB.Begin(context.Background())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback(context.Background()) // Rollback if something fails
+
+	// Update payment status
+	_, err = tx.Exec(context.Background(), "UPDATE payments SET status = $1 WHERE id = $2", req.Status, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	var bookingID, roomID int
+
+	// Get booking ID and room ID from the payment
+	err = tx.QueryRow(context.Background(), "SELECT booking_id FROM payments WHERE id = $1", id).Scan(&bookingID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get room ID from the booking
+	err = tx.QueryRow(context.Background(), "SELECT room_id FROM bookings WHERE id = $1", bookingID).Scan(&roomID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Handle different payment statuses
+	switch req.Status {
+	case "accepted":
+		// Payment accepted → Confirm booking, mark room as booked
+		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'confirmed' WHERE id = $1", bookingID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'booked' WHERE id = $1", roomID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	case "canceled":
+		// Payment canceled → Cancel booking, keep room available
+		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'canceled' WHERE id = $1", bookingID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'available' WHERE id = $1", roomID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit(context.Background()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment status updated successfully"})
+}
+
+
+
 
