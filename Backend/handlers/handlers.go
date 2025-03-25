@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -395,41 +396,35 @@ func (h *Handler) GetAllBookings(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, bookings)
 }
-func (h *Handler) GetDetailBookings(c *gin.Context) {
-	startDate := c.Query("start_date")
-	endDate := c.Query("end_date")
+func (h *Handler) GetDetailBooking(c *gin.Context) {
+	id := c.Param("id")
 
 	query := `
 		SELECT b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status, b.created_at
 		FROM bookings b
 		INNER JOIN rooms rm ON b.room_id = rm.id
 		INNER JOIN users u ON b.user_id = u.id
+		WHERE b.id = $1
 	`
-	var args []interface{}
-	if startDate != "" && endDate != "" {
-		query += " WHERE b.start_date >= $1 AND b.end_date <= $2"
-		args = append(args, startDate, endDate)
-	}
 
-	rows, err := h.DB.Query(context.Background(), query, args...)
+	var booking models.Booking
+	err := h.DB.QueryRow(context.Background(), query, id).Scan(
+		&booking.ID, &booking.RoomID, &booking.RoomNumber,
+		&booking.UserID, &booking.UserEmail, &booking.StartDate,
+		&booking.EndDate, &booking.Status, &booking.CreatedAt,
+	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if err == pgx.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
-	defer rows.Close()
 
-	var bookings []models.Booking
-	for rows.Next() {
-		var booking models.Booking
-		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber,
-			&booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status, &booking.CreatedAt); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		bookings = append(bookings, booking)
-	}
-	c.JSON(http.StatusOK, bookings)
+	c.JSON(http.StatusOK, booking)
 }
+
 func (h *Handler) CreateBooking(c *gin.Context) {
 	var booking models.Booking
 	if err := c.ShouldBindJSON(&booking); err != nil {
@@ -572,7 +567,7 @@ func (h *Handler) CreatePayment(c *gin.Context) {
 
 	err := h.DB.QueryRow(context.Background(), `
 		INSERT INTO payments (booking_id, amount, method, created_at)
-		VALUES ($1, $2, "Virtual Account", NOW())
+		VALUES ($1, $2, 'Virtual Account', NOW())
 		RETURNING id`, payment.BookingID, payment.Amount).Scan(&payment.ID)
 
 	if err != nil {

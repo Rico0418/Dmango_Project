@@ -49,7 +49,7 @@ func main(){
 		protected.DELETE("/complaints/:id",h.DeleteComplaint)
 
 		protected.GET("/bookings",h.GetAllBookings)
-		protected.GET("/bookings/detail", h.GetDetailBookings)
+		protected.GET("/bookings/:id", h.GetDetailBooking)
 		protected.POST("/bookings", h.CreateBooking)
 		protected.DELETE("/bookings/:id", h.DeleteBooking)
 
