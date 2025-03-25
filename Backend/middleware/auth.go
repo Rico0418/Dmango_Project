@@ -2,10 +2,12 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"dmangoapp/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -31,8 +33,29 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user_id", claims["user_id"])
-		c.Set("role", claims["role"])
+		// Handle user_id as int or string
+		var userID int
+		switch v := claims["user_id"].(type) {
+		case float64: // JWT often encodes numbers as float64
+			userID = int(v)
+		case int:
+			userID = v
+		case string:
+			userID, err = strconv.Atoi(v)
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+				c.Abort()
+				return
+			}
+		default:
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token payload"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", userID)
+		c.Set("role", claims["role"]) // Assuming role is stored in claims
 		c.Next()
 	}
 }
+

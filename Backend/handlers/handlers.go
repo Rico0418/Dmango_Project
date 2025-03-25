@@ -4,6 +4,7 @@ import (
 	"context"
 	"dmangoapp/models"
 	"dmangoapp/utils"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ type Handler struct {
 
 // handler for models Guest House
 func (h *Handler) GetAllGuestHouses(c *gin.Context) {
-	rows, err := h.DB.Query(context.Background(), `SELECT * FROM guest_houses`)
+	rows, err := h.DB.Query(context.Background(), `SELECT * FROM guest_house`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return
@@ -36,7 +37,7 @@ func (h *Handler) GetAllGuestHouses(c *gin.Context) {
 func (h *Handler) GetDetailGuestHouses(c *gin.Context) {
 	id := c.Param("id")
 	var guestHouse models.GuestHouse
-	err := h.DB.QueryRow(context.Background(), "SELECT id, admin_id,name,location FROM guest_houses WHERE id = $1", id).
+	err := h.DB.QueryRow(context.Background(), "SELECT id, admin_id,name,location FROM guest_house WHERE id = $1", id).
 		Scan(&guestHouse.ID, &guestHouse.AdminID, &guestHouse.Name, &guestHouse.Location)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Guest House not found"})
@@ -135,7 +136,7 @@ func (h *Handler) Register(c *gin.Context) {
 	}
 	user.Password = hashedPassword
 	_, err = h.DB.Exec(context.Background(),
-		"INSERT INTO users (email, password) VALUES ($1, $2)", user.Email, user.Password)
+		"INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", user.Name,user.Email, user.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return
@@ -182,6 +183,7 @@ func (h *Handler) Login(c *gin.Context) {
 }
 func (h *Handler) UpdatePassword(c *gin.Context) {
 	userID := c.GetInt("user_id")
+	fmt.Println("User ID from token:", userID)
 
 	var req struct {
 		OldPassword string `json:"old_password"`

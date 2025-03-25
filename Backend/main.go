@@ -56,7 +56,7 @@ func main(){
 		protected.GET("/payments",h.GetAllPayments)
 		protected.GET("/payments/:id",h.GetPaymentDetail)
 		protected.POST("/payments",h.CreatePayment)
-		protected.DELETE("/paymnents/:id",h.DeletePayment)
+		protected.DELETE("/payments/:id",h.DeletePayment)
 		protected.PUT("/payments/:id",h.UpdatePaymentStatus)
 	}
 	r.Run(":8080")
