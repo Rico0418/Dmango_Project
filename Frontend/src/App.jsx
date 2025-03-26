@@ -4,10 +4,14 @@ import { AuthProvider } from './context/AuthContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify';
 import appRoutes from './Route';
-function App() {
 
-  return (
-    <AuthProvider>
+function AppContent() {
+  return(
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      minHeight: "100vh",
+    }}>
       <Router>
         <Routes>
           {appRoutes.map(({ path, element }, index) => (
@@ -22,6 +26,13 @@ function App() {
           pauseOnHover
           draggable />
       </Router>
+    </div>
+  )
+}
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   )
 }

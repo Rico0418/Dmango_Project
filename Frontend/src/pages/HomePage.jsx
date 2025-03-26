@@ -1,28 +1,44 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { Button } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
+import Footer from "../components/organisms/Footer";
+import Navbar from "../components/organisms/Navbar";
+import building from "../assets/building.jpg"
 const HomePage = () => {
-    const navigate = useNavigate();
-    const { logout } = useAuth();
-
-    // Get token from localStorage
-    const token = localStorage.getItem("token");
-    console.log("Token from localStorage:", token);
-
-    // Logout function
-    const handleLogout = () => {
-        logout(); // Clears user state in context
-        localStorage.removeItem("token"); // Clears token from localStorage
-        navigate("/login"); // Redirect to login page
-    };
 
     return (
         <div>
-            <h1>Ini HomePage</h1>
-            <p>Token: {token}</p>
-            <Button variant="contained" color="primary" onClick={handleLogout}>
-                Logout
-            </Button>
+            <Navbar />
+            <main style={{ padding: '30px' }}>
+                <Container maxWidth="md">
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            textAlign: "center",
+                            minHeight: "70vh",
+                        }}
+                    >
+                        <Typography variant="h3" fontWeight="bold" gutterBottom>
+                            Welcome to Dmango Residence
+                        </Typography>
+
+                        <Typography variant="body1" sx={{ maxWidth: "600px", marginBottom: "20px" }}>
+                            Dmango Residence is a premium accommodation service offering comfortable,
+                            affordable, and modern living spaces. Whether you're looking for short-term
+                            stays or long-term rentals, we provide a seamless booking experience.
+                        </Typography>
+
+                        <Box
+                            component="img"
+                            src={building}
+                            alt="Dmango Residence"
+                            sx={{ width: "100%", maxWidth: "500px", borderRadius: "10px", boxShadow: 2 }}
+                        />
+                    </Box>
+                </Container>
+            </main>
+            <Footer />
         </div>
     );
 };
