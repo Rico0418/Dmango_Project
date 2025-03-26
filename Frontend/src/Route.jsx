@@ -5,7 +5,7 @@ import RoleBasedRoute from "./routes/RoleBasedRoute";
 
 const LazyLoader = (Component) => (
   <Suspense fallback={<div>Loading...</div>}>
-    <Component />
+    {React.createElement(Component)} 
   </Suspense>
 );
 
@@ -13,25 +13,25 @@ const LazyLoader = (Component) => (
 const Login = lazy(() => import("./pages/LoginPage"));
 const Register = lazy(() => import("./pages/RegisterPage"));
 const Home = lazy(() => import("./pages/HomePage"));
-const ManageUsers = lazy(() => import("./pages/admin/ManageUsers"));
-const ManageRooms = lazy(() => import("./pages/admin/ManageRooms"));
-const BookingHistory = lazy(() => import("./pages/customer/BookingHistory"));
-const RoomList = lazy(() => import("./pages/customer/RoomList"));
+// const ManageUsers = lazy(() => import("./pages/admin/ManageUsers"));
+// const ManageRooms = lazy(() => import("./pages/admin/ManageRooms"));
+// const BookingHistory = lazy(() => import("./pages/customer/BookingHistory"));
+// const RoomList = lazy(() => import("./pages/customer/RoomList"));
 
 const routesConfig = [
-  { path: "/login", element: <Login />, protected: false },
-  { path: "/register", element: <Register />, protected: false },
+  { path: "/login", element: Login, protected: false },
+  { path: "/register", element: Register, protected: false },
 
   // Common protected routes (accessible to all authenticated users)
-  { path: "/", element: <Dashboard />, protected: true },
+  { path: "/", element: Home, protected: true },
 
-  // Admin Routes (only accessible by admin)
-  { path: "/admin/manage-users", element: <ManageUsers />, role: "admin", protected: true },
-  { path: "/admin/manage-rooms", element: <ManageRooms />, role: "admin", protected: true },
+  // // Admin Routes (only accessible by admin)
+  // { path: "/admin/manage-users", element: <ManageUsers />, role: "admin", protected: true },
+  // { path: "/admin/manage-rooms", element: <ManageRooms />, role: "admin", protected: true },
 
-  // Customer Routes (only accessible by customers)
-  { path: "/customer/bookings", element: <BookingHistory />, role: "customer", protected: true },
-  { path: "/customer/rooms", element: <RoomList />, role: "customer", protected: true },
+  // // Customer Routes (only accessible by customers)
+  // { path: "/customer/bookings", element: <BookingHistory />, role: "customer", protected: true },
+  // { path: "/customer/rooms", element: <RoomList />, role: "customer", protected: true },
 ];
 
 const appRoutes = [
