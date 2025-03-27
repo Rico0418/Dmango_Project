@@ -13,8 +13,7 @@ const LazyLoader = (Component) => (
 const Login = lazy(() => import("./pages/LoginPage"));
 const Register = lazy(() => import("./pages/RegisterPage"));
 const Home = lazy(() => import("./pages/HomePage"));
-// const ManageUsers = lazy(() => import("./pages/admin/ManageUsers"));
-// const ManageRooms = lazy(() => import("./pages/admin/ManageRooms"));
+const ManageRooms = lazy(() => import("./pages/admin/ManageRooms"));
 // const BookingHistory = lazy(() => import("./pages/customer/BookingHistory"));
 // const RoomList = lazy(() => import("./pages/customer/RoomList"));
 
@@ -27,7 +26,7 @@ const routesConfig = [
 
   // // Admin Routes (only accessible by admin)
   // { path: "/admin/manage-users", element: <ManageUsers />, role: "admin", protected: true },
-  // { path: "/admin/manage-rooms", element: <ManageRooms />, role: "admin", protected: true },
+  { path: "/admin/manage-rooms", element: ManageRooms, role: "admin", protected: true },
 
   // // Customer Routes (only accessible by customers)
   // { path: "/customer/bookings", element: <BookingHistory />, role: "customer", protected: true },

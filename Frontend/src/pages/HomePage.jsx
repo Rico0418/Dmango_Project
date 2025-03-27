@@ -1,9 +1,20 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Button, Container, IconButton, Typography } from "@mui/material";
 import Footer from "../components/organisms/Footer";
 import Navbar from "../components/organisms/Navbar";
-import building from "../assets/building.jpg"
-const HomePage = () => {
+import building from "../assets/building.jpg";
+import exterior from "../assets/exterior.jpg";
+import stair from "../assets/stair.jpg";
+import { useState } from "react";
 
+const images = [building,exterior,stair];
+const HomePage = () => {
+    const [currentImage, setCurrentImage] = useState(0);
+    const handleNext = () => {
+        setCurrentImage((prev)=>(prev+1) % images.length);
+    };
+    const handlePrev = () => {
+        setCurrentImage((prev)=>(prev-1 + images.length) % images.length);
+    };
     return (
         <div>
             <Navbar />
@@ -16,7 +27,7 @@ const HomePage = () => {
                             alignItems: "center",
                             justifyContent: "center",
                             textAlign: "center",
-                            minHeight: "70vh",
+                            minHeight: "80vh",
                         }}
                     >
                         <Typography variant="h3" fontWeight="bold" gutterBottom>
@@ -30,11 +41,37 @@ const HomePage = () => {
                         </Typography>
 
                         <Box
-                            component="img"
-                            src={building}
-                            alt="Dmango Residence"
-                            sx={{ width: "100%", maxWidth: "500px", borderRadius: "10px", boxShadow: 2 }}
-                        />
+                         sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: "500px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}>
+                           <Button
+                                onClick={handlePrev}
+                                variant="contained"
+                                sx={{ position: "absolute", left: -65 }}
+                            >
+                                {"◀"}
+                            </Button>
+
+                            <Box
+                                component="img"
+                                src={images[currentImage]}
+                                alt="Dmango Residence"
+                                sx={{ width: "100%", borderRadius: "10px", boxShadow: 2 }}
+                            />
+
+                            <Button
+                                onClick={handleNext}
+                                variant="contained"
+                                sx={{ position: "absolute", right: -65 }}
+                            >
+                                 {"▶"}
+                            </Button>
+                        </Box>
                     </Box>
                 </Container>
             </main>
