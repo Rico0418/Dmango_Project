@@ -31,7 +31,7 @@ const TableComponent = ({ columns, rows }) => {
                 <TableHead>
                     <TableRow>
                         {columns.map((column, index) => (
-                            <TableCell key={index} sx={{ fontWeight: "bold" }}>
+                            <TableCell key={index} sx={{ fontWeight: "bold", textAlign:"center" }}>
                                 {column.label}
                             </TableCell>
                         ))}

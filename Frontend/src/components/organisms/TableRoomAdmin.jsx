@@ -1,7 +1,7 @@
 import TableComponent from "../molecules/TableComponent";
 const columns = [
     { field: "id", label: "ID"},
-    { field: "guest_house_id", label: "GuestHouseID"},
+    { field: "guest_house_id", label: "Guest House ID"},
     { field: "room_number", label: "Room Number"},
     { field: "type", label: "Room Type"},
     { field: "price_per_day", label: "Price Per Day"},
