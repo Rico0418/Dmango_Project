@@ -1,7 +1,8 @@
-import { AppBar, Toolbar, Button, Tabs, Tab, Box } from "@mui/material";
+import { AppBar, Toolbar, Button, Tabs, Tab, Box, IconButton } from "@mui/material";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import TypographyTemplate from "../molecules/Typography";
+import AccountCircle from '@mui/icons-material/AccountCircle';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -25,28 +26,33 @@ const Navbar = () => {
                     <Tabs
                         value={location.pathname}
                         textColor="inherit"
-                        indicatorColor="secondary"
+                        sx={{ "& .MuiTabs-indicator": { backgroundColor: "white" } }}
                     >
-                        <Tab label="Home" value="/" onClick={() => navigate("/")} />
+                        <Tab label="Home" value="/" onClick={() => navigate("/")} sx={{ "&:focus": { outline: "none" } }} />
                         {user?.role === "admin" && (
-                            <Tab label="Manage Users" value="/admin/manage-users" onClick={() => navigate("/admin/manage-users")} />
+                            <Tab label="Manage Users" value="/admin/manage-users" onClick={() => navigate("/admin/manage-users")} sx={{ "&:focus": { outline: "none" } }} />
                         )}
                         {user?.role === "admin" && (
-                            <Tab label="Manage Rooms" value="/admin/manage-rooms" onClick={() => navigate("/admin/manage-rooms")} />
+                            <Tab label="Manage Rooms" value="/admin/manage-rooms" onClick={() => navigate("/admin/manage-rooms")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
                         {user?.role === "customer" && (
-                            <Tab label="Bookings" value="/customer/bookings" onClick={() => navigate("/customer/bookings")} />
+                            <Tab label="Bookings" value="/customer/bookings" onClick={() => navigate("/customer/bookings")}sx={{ "&:focus": { outline: "none" } }}/>
                         )}
                         {user?.role === "customer" && (
-                            <Tab label="Rooms" value="/customer/rooms" onClick={() => navigate("/customer/rooms")} />
+                            <Tab label="Rooms" value="/customer/rooms" onClick={() => navigate("/customer/rooms")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
                     </Tabs>
                 </Box>
 
                 {user && (
-                    <Button variant="contained" color="error" onClick={handleLogout}>
-                        Logout
-                    </Button>
+                    <>
+                        <IconButton sx={{ color:"inherit", mr:1 }} onClick={()=>navigate(`/user/profile/${user.id}`)}>
+                            <AccountCircle sx={{ fontSize:40 }}/>
+                        </IconButton>
+                        <Button variant="contained" color="error" onClick={handleLogout}>
+                            Logout
+                        </Button>
+                    </>
                 )}
             </Toolbar>
         </AppBar>

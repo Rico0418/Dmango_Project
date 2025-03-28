@@ -26,10 +26,6 @@ const Footer = () => {
                     <Link href="/contact" sx={footerLinkStyles}>Contact</Link>
                 </Box>
 
-                <Typography variant="body2" sx={{ marginTop: "10px" }}>
-                    📍 Semarang, Indonesia | 📞 +62 812-3456-7890 | ✉️ support@dmango.com
-                </Typography>
-
                 <Typography variant="body2" sx={{ marginTop: "8px", opacity: 0.8 }}>
                     © {new Date().getFullYear()} Dmango Residence. All rights reserved.
                 </Typography>
