@@ -39,6 +39,7 @@ func main(){
 		protected.GET("/rooms/:id",h.GetDetailRoom)
 		protected.PUT("/rooms/:id",h.UpdateRoomPrice)
 
+		protected.GET("/users/detail/:id",h.GetDetailUser)
 		protected.PUT("/users/password", h.UpdatePassword)
 
 		protected.GET("/complaints",h.GetAllComplaints)

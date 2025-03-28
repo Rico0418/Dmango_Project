@@ -182,6 +182,21 @@ func (h *Handler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
+func (h *Handler) GetDetailUser(c *gin.Context) {
+	id := c.Param("id")
+	var user models.User
+	err := h.DB.QueryRow(context.Background(), "SELECT id,name,email,password FROM users WHERE id = $1", id).
+		Scan(&user.ID, &user.Name, &user.Email, &user.Password)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"id":    user.ID,
+		"name":  user.Name,
+		"email": user.Email,
+	})
+}
 func (h *Handler) UpdatePassword(c *gin.Context) {
 	userID := c.GetInt("user_id")
 	fmt.Println("User ID from token:", userID)
