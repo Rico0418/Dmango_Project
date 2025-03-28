@@ -30,7 +30,7 @@ const Navbar = () => {
                     >
                         <Tab label="Home" value="/" onClick={() => navigate("/")} sx={{ "&:focus": { outline: "none" } }} />
                         {user?.role === "admin" && (
-                            <Tab label="Manage Users" value="/admin/manage-users" onClick={() => navigate("/admin/manage-users")} sx={{ "&:focus": { outline: "none" } }} />
+                            <Tab label="Manage Complaints" value="/admin/manage-complaints" onClick={() => navigate("/admin/manage-complaints")} sx={{ "&:focus": { outline: "none" } }} />
                         )}
                         {user?.role === "admin" && (
                             <Tab label="Manage Rooms" value="/admin/manage-rooms" onClick={() => navigate("/admin/manage-rooms")} sx={{ "&:focus": { outline: "none" } }}/>
