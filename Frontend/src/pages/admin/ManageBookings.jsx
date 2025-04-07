@@ -38,6 +38,7 @@ const ManageBookings = () => {
     const getDynamicActions = (booking) => {
         console.log("Checking actions for booking:", booking);
         let actions = [];
+        const status = booking.status.trim();
         if (status === "confirmed") {
             actions.push({ label: "Delete", color: "error", onClick: () => handleDelete(booking.id) });
         }
