@@ -12,7 +12,7 @@ func main(){
 	r := gin.Default()
 	r.Use(func (c *gin.Context)  {
 		c.Writer.Header().Set("Access-Control-Allow-Origin","*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		
 		c.Writer.Header().Set("X-Content-Type-Options", "nosniff")
@@ -58,7 +58,7 @@ func main(){
 		protected.GET("/payments/:id",h.GetPaymentDetail)
 		protected.POST("/payments",h.CreatePayment)
 		protected.DELETE("/payments/:id",h.DeletePayment)
-		protected.PUT("/payments/:id",h.UpdatePaymentStatus)
+		protected.PATCH("/payments/:id",h.UpdatePaymentStatus)
 	}
 	r.Run(":8080")
 }
