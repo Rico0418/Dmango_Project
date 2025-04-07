@@ -1,44 +1,46 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import TableRoomAdmin from "../../components/organisms/TableRoomAdmin";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-const ManageRooms = () => {
+import { toast } from "react-toastify";
+import TableBookingAdmin from "../../components/organisms/TableBookingAdmin";
+const ManageBookings = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
-    const navigate = useNavigate();
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/rooms", {
+                const response = await axios.get("http://localhost:8080/bookings", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                const formattedRows = response.data.map((room) => ({
-                    id: room.id,
-                    guest_house_id: room.guest_house_id,
-                    room_number: room.room_number,
-                    type: room.type,
-                    price_per_day: room.price_per_day,
-                    price_per_month: room.price_per_month,
-                    status: room.status,
-                    actions: getDynamicActions(room),
+                const formattedRows = response.data.map((booking) => ({
+                    id: booking.id,
+                    room_number: booking.room_number,
+                    email: booking.email,
+                    start_date: booking.start_date.substring(0, 10),
+                    end_date: booking.end_date.substring(0, 10),
+                    created_at: booking.created_at.substring(0, 10),
+                    status: booking.status,
+                    actions: getDynamicActions(booking),
                 }));
                 setRows(formattedRows);
+                console.log("Formatted Rows: ", formattedRows);
             } catch (error) {
                 console.error(error);
             }
         };
         fetchData();
     }, []);
-    const getDynamicActions = (room) => {
+    const getDynamicActions = (booking) => {
+        console.log("Checking actions for booking:", booking);
         let actions = [];
-        actions.push({ label: "Edit", color: "primary", onClick: () => handleEdit(room) });
-
+        if (status === "confirmed") {
+            actions.push({ label: "Delete", color: "error", onClick: () => handleDelete(booking.id) });
+        }
         return actions;
     };
     const sortedRows = [...rows].sort((a, b) => {
@@ -56,8 +58,20 @@ const ManageRooms = () => {
             direction: prevSort.key === key && prevSort.direction === "asc" ? "desc" : "asc",
         }));
     }
-    const handleEdit = (room) => {
-        navigate(`/admin/manage-rooms/update/${room.id}`);
+    const handleDelete = async (id) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.delete(`http://localhost:8080/bookings/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            setRows((prevRows) => prevRows.filter((row) => row.id !== id));
+            toast.success("Delete success");
+        } catch (error) {
+            console.error(error);
+        }
     };
     return (
         <div>
@@ -70,7 +84,7 @@ const ManageRooms = () => {
                         gutterBottom
                         sx={{ fontWeight: "bold" }}
                     >
-                        Room List
+                        Booking List
                     </Typography>
                     <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
@@ -79,7 +93,7 @@ const ManageRooms = () => {
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
                     <Box sx={{ mt: 3 }}>
-                        <TableRoomAdmin rows={sortedRows} />
+                        <TableBookingAdmin rows={sortedRows} />
                     </Box>
                 </Paper>
             </Container>
@@ -87,4 +101,4 @@ const ManageRooms = () => {
         </div>
     );
 };
-export default ManageRooms;
+export default ManageBookings;

@@ -101,7 +101,7 @@ const ManageComplaints = () => {
     return (
         <div>
             <Navbar />
-            <Container maxWidth="xl" sx={{ mt: 10, mb: 10 }}>
+            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "60vh" }}>
                 <Paper sx={{ p: 3, boxShadow: 3 }}>
                     <Typography
                         variant="h2"
