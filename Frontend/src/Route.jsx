@@ -1,22 +1,23 @@
-import React, { lazy, Suspense } from "react";
+import React, { Suspense } from "react";
 import { Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute"; 
 import RoleBasedRoute from "./routes/RoleBasedRoute"; 
-
+import LoadingScreen from "./pages/LoadingScreen";
+import { LazyWithTimeout } from "./utils/LazyWithTimeout";
 const LazyLoader = (Component) => (
-  <Suspense fallback={<div>Loading...</div>}>
+  <Suspense fallback={<LoadingScreen />}>
     {React.createElement(Component)} 
   </Suspense>
 );
 
-const Login = lazy(() => import("./pages/LoginPage"));
-const Register = lazy(() => import("./pages/RegisterPage"));
-const Home = lazy(() => import("./pages/HomePage"));
-const ManageRooms = lazy(() => import("./pages/admin/ManageRooms"));
-const UpdateRooms = lazy(() => import("./pages/admin/UpdateRoomAdmin"));
-const UserProfile = lazy(() => import("./pages/UserProfilePage"));
-const Contact = lazy(()=> import("./pages/ContactPage"));
-const ManageComplaints = lazy(() => import("./pages/admin/ManageComplaints"));
+const Login = LazyWithTimeout(() => import("./pages/LoginPage"));
+const Register = LazyWithTimeout(() => import("./pages/RegisterPage"));
+const Home = LazyWithTimeout(() => import("./pages/HomePage"));
+const ManageRooms = LazyWithTimeout(() => import("./pages/admin/ManageRooms"));
+const UpdateRooms = LazyWithTimeout(() => import("./pages/admin/UpdateRoomAdmin"));
+const UserProfile = LazyWithTimeout(() => import("./pages/UserProfilePage"));
+const Contact = LazyWithTimeout(()=> import("./pages/ContactPage"));
+const ManageComplaints = LazyWithTimeout(() => import("./pages/admin/ManageComplaints"));
 // const BookingHistory = lazy(() => import("./pages/customer/BookingHistory"));
 // const RoomList = lazy(() => import("./pages/customer/RoomList"));
 
