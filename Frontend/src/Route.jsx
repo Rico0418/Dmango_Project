@@ -4,6 +4,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleBasedRoute from "./routes/RoleBasedRoute"; 
 import LoadingScreen from "./pages/LoadingScreen";
 import { LazyWithTimeout } from "./utils/LazyWithTimeout";
+
 const LazyLoader = (Component) => (
   <Suspense fallback={<LoadingScreen />}>
     {React.createElement(Component)} 
@@ -21,7 +22,8 @@ const ManageComplaints = LazyWithTimeout(() => import("./pages/admin/ManageCompl
 const ManageBookings = LazyWithTimeout(() => import("./pages/admin/ManageBookings"));
 const ManagePaymentDetail = LazyWithTimeout(() => import("./pages/admin/ManagePaymentDetail"));
 // const BookingHistory = lazy(() => import("./pages/customer/BookingHistory"));
-// const RoomList = lazy(() => import("./pages/customer/RoomList"));
+const RoomList = LazyWithTimeout(() => import("./pages/customer/GetAllRoom"));
+const RoomDetail = LazyWithTimeout(() => import("./pages/customer/GetDetailRoom"));
 
 const routesConfig = [
   { path: "/login", element: Login, protected: false },
@@ -41,7 +43,8 @@ const routesConfig = [
 
   // // Customer Routes (only accessible by customers)
   // { path: "/customer/bookings", element: <BookingHistory />, role: "customer", protected: true },
-  // { path: "/customer/rooms", element: <RoomList />, role: "customer", protected: true },
+  { path: "/customer/rooms", element: RoomList, role: "customer", protected: true },
+  { path: "/customer/rooms/:id", element: RoomDetail, role: "customer", protected: true}
 ];
 
 const appRoutes = [

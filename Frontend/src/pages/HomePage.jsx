@@ -4,9 +4,10 @@ import Navbar from "../components/organisms/Navbar";
 import building from "../assets/building.jpg";
 import exterior from "../assets/exterior.jpg";
 import stair from "../assets/stair.jpg";
+import facility from "../assets/facility_1.jpg";
 import { useState } from "react";
 
-const images = [building,exterior,stair];
+const images = [building,exterior,stair,facility];
 const HomePage = () => {
     const [currentImage, setCurrentImage] = useState(0);
     const handleNext = () => {
@@ -52,7 +53,16 @@ const HomePage = () => {
                            <Button
                                 onClick={handlePrev}
                                 variant="contained"
-                                sx={{ position: "absolute", left: -65 }}
+                                sx={{ position: "absolute", left: -65, outline: "none",
+                                    boxShadow: "none",
+                                    "&:focus": {
+                                      outline: "none",
+                                      boxShadow: "none",
+                                    },
+                                    "&:active": {
+                                      outline: "none",
+                                      boxShadow: "none",
+                                    }, }}
                             >
                                 {"◀"}
                             </Button>
@@ -67,7 +77,16 @@ const HomePage = () => {
                             <Button
                                 onClick={handleNext}
                                 variant="contained"
-                                sx={{ position: "absolute", right: -65 }}
+                                sx={{ position: "absolute", right: -65,outline: "none",
+                                    boxShadow: "none",
+                                    "&:focus": {
+                                      outline: "none",
+                                      boxShadow: "none",
+                                    },
+                                    "&:active": {
+                                      outline: "none",
+                                      boxShadow: "none",
+                                    }, }}
                             >
                                  {"▶"}
                             </Button>

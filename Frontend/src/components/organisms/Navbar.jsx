@@ -42,9 +42,6 @@ const Navbar = () => {
                             <Tab label="Manage Payments" value="/admin/manage-payments" onClick={() => navigate("/admin/manage-payments")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
                         {user?.role === "customer" && (
-                            <Tab label="Bookings" value="/customer/bookings" onClick={() => navigate("/customer/bookings")}sx={{ "&:focus": { outline: "none" } }}/>
-                        )}
-                        {user?.role === "customer" && (
                             <Tab label="Rooms" value="/customer/rooms" onClick={() => navigate("/customer/rooms")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
                     </Tabs>
