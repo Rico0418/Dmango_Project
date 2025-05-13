@@ -8,6 +8,8 @@ import roomImage from "../../assets/room.png";
 import toilet from "../../assets/toilet.jpg"
 import TypographyTemplate from "../../components/molecules/Typography";
 import { KeyboardArrowLeft, KeyboardArrowRight } from "@mui/icons-material";
+import BookingPopup from "../../components/organisms/BookingPopup";
+
 
 const GetDetailRoom = () => {
     const { id } = useParams();
@@ -15,6 +17,9 @@ const GetDetailRoom = () => {
     const images = [roomImage, toilet];
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
+
+    //modal state
+    const [dialogOpen, setDialogOpen] = useState(false);
     useEffect(() => {
         const fetchRoomDetail = async () => {
             try {
@@ -26,7 +31,7 @@ const GetDetailRoom = () => {
                 });
                 const data = response.data;
 
-                if (data.status.trim() === "booked"){
+                if (data.status.trim() === "booked") {
                     navigate("/customer/rooms");
                 } else {
                     setRoom(data);
@@ -104,8 +109,18 @@ const GetDetailRoom = () => {
                                 </TypographyTemplate>
                             )}
                         </Box>
+                        <Box mt={4}>
+                            <Button variant="contained" color="primary" onClick={() => setDialogOpen(true)}>
+                                Book Room
+                            </Button>
+                        </Box>
                     </Paper>
                 )}
+                <BookingPopup
+                    open={dialogOpen}
+                    onClose={() => setDialogOpen(false)}
+                    room={room}
+                />
             </Container>
             <Footer />
         </div>
