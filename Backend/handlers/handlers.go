@@ -595,18 +595,43 @@ func (h *Handler) CreatePayment(c *gin.Context) {
 func (h *Handler) DeletePayment(c *gin.Context) {
 	id := c.Param("id")
 
-	result, err := h.DB.Exec(context.Background(), "DELETE FROM payments WHERE id = $1", id)
+	tx, err := h.DB.Begin(context.Background())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start transaction"})
+		return
+	}
+	defer tx.Rollback(context.Background()) 
+
+	
+	var bookingID int
+	err = tx.QueryRow(context.Background(), "SELECT booking_id FROM payments WHERE id = $1", id).Scan(&bookingID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
 		return
 	}
 
+	result, err := tx.Exec(context.Background(), "DELETE FROM payments WHERE id = $1", id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete payment"})
+		return
+	}
 	if result.RowsAffected() == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Payment deleted successfully"})
+	_, err = tx.Exec(context.Background(), "DELETE FROM bookings WHERE id = $1", bookingID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete booking"})
+		return
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment and associated booking deleted successfully"})
 }
 func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 	id := c.Param("id")
