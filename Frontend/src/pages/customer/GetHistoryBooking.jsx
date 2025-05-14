@@ -1,0 +1,77 @@
+import { useEffect, useState } from "react";
+import Footer from "../../components/organisms/Footer";
+import Navbar from "../../components/organisms/Navbar";
+import { useAuth } from "../../context/AuthContext";
+import axios from "axios";
+import { Card, CardContent, Typography, Alert } from "@mui/material";
+
+const GetHistoryBooking = () => {
+    const { user } = useAuth();
+    const [payments, setPayments] = useState([]);
+    const [error, setError] = useState("");
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await axios.get(`http://localhost:8080/payments/user/${user.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setPayments(Array.isArray(res.data) ? res.data : []);
+            } catch (err) {
+                setError("Failed to fetch booking history");
+            }
+        };
+        fetchPayments();
+    }, [user.id]);
+    return (
+        <div>
+            <Navbar />
+            <div style={{ padding: "2rem", minHeight: "80vh" }}>
+                <Typography variant="h4" gutterBottom>
+                    Booking History
+                </Typography>
+                {error && <Alert severity="error">{error}</Alert>}
+                {payments.length === 0 ? (
+                    <Typography>No bookings found.</Typography>
+                ) : (
+                    payments.map((payment) => (
+                        <Card key={payment.id} sx={{
+                            mb: 3, borderRadius: 2,
+                            boxShadow: 3, border: "1px solid #e0e0e0",
+                        }}>
+                            <CardContent>
+                                <Typography variant="h6" gutterBottom color="primary">
+                                    Room #{payment.booking.room_number.trim()}
+                                </Typography>
+                                <Typography variant="body1">
+                                    <strong>Start Date:</strong>{" "}
+                                    {new Date(payment.booking.start_date).toLocaleDateString()}
+                                </Typography>
+                                <Typography variant="body1">
+                                    <strong>End Date:</strong>{" "}
+                                    {new Date(payment.booking.end_date).toLocaleDateString()}
+                                </Typography>
+                                <Typography variant="body1">
+                                    <strong>Amount:</strong> Rp{payment.amount.toLocaleString()}
+                                </Typography>
+                                <Typography variant="body1">
+                                    <strong>Status:</strong>{" "}
+                                    {payment.status.trim().charAt(0).toUpperCase() +
+                                        payment.status.trim().slice(1).toLowerCase()}
+                                </Typography>
+
+                                {payment.status.trim().toLowerCase() === "pending" && (
+                                    <Alert severity="warning" sx={{ mt: 2 }}>
+                                        Please contact the owner to complete your transaction.
+                                    </Alert>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
+            <Footer />
+        </div>
+    );
+}
+export default GetHistoryBooking;

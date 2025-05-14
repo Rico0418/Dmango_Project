@@ -44,6 +44,9 @@ const Navbar = () => {
                         {user?.role === "customer" && (
                             <Tab label="Rooms" value="/customer/rooms" onClick={() => navigate("/customer/rooms")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
+                        {user?.role === "customer" && (
+                            <Tab label="History" value="/customer/bookings" onClick={() => navigate("/customer/bookings")} sx={{ "&:focus": { outline: "none" } }}/>
+                        )}
                     </Tabs>
                 </Box>
 
