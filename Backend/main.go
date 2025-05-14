@@ -55,7 +55,7 @@ func main(){
 		protected.DELETE("/bookings/:id", h.DeleteBooking)
 
 		protected.GET("/payments",h.GetAllPayments)
-		protected.GET("/payments/:id",h.GetPaymentDetail)
+		protected.GET("/payments/user/:user_id",h.GetPaymentDetailbyUserID)
 		protected.POST("/payments",h.CreatePayment)
 		protected.DELETE("/payments/:id",h.DeletePayment)
 		protected.PATCH("/payments/:id",h.UpdatePaymentStatus)

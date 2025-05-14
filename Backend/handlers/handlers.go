@@ -536,41 +536,47 @@ func (h *Handler) GetAllPayments(c *gin.Context) {
 
 	c.JSON(http.StatusOK, payments)
 }
-func (h *Handler) GetPaymentDetail(c *gin.Context) {
-	id := c.Param("id")
-	status := c.Query("status") 
-
+func (h *Handler) GetPaymentDetailbyUserID(c *gin.Context) {
+	userID := c.Param("user_id")
 	query := `
 		SELECT p.id, p.booking_id, p.amount, p.method, p.status, p.created_at,
-		       b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status
+		b.id, b.user_id, u.email, b.room_id, rm.room_number, b.start_date, b.end_date, b.status
 		FROM payments p
 		INNER JOIN bookings b ON p.booking_id = b.id
 		INNER JOIN rooms rm ON b.room_id = rm.id
 		INNER JOIN users u ON b.user_id = u.id
-		WHERE p.id = $1`
+		WHERE b.user_id = $1
+		ORDER BY p.created_at DESC`
 
-	args := []interface{}{id}
-
-	if status != "" {
-		query += " AND p.status = $2"
-		args = append(args, status)
-	}
-
-	var payment models.Payment
-	var booking models.Booking
-
-	err := h.DB.QueryRow(context.Background(), query, args...).Scan(
-		&payment.ID, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
-		&booking.ID, &booking.RoomID, &booking.RoomNumber, &booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status,
-	)
-
+	rows, err := h.DB.Query(context.Background(), query, userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch payments"})
 		return
 	}
+	defer rows.Close()
 
-	payment.Booking = &booking
-	c.JSON(http.StatusOK, payment)
+	var payments []models.Payment
+
+	for rows.Next() {
+		var payment models.Payment
+		var booking models.Booking
+
+		err := rows.Scan(
+			&payment.ID, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
+			&booking.ID, &booking.UserID, &booking.UserEmail, &booking.RoomID, &booking.RoomNumber,
+			&booking.StartDate, &booking.EndDate, &booking.Status,
+		)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning data"})
+			return
+		}
+
+		payment.Booking = &booking
+		payments = append(payments, payment)
+	}
+
+	c.JSON(http.StatusOK, payments)
 }
 func (h *Handler) CreatePayment(c *gin.Context) {
 	var payment models.Payment
