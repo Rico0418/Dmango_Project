@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
 import { isBefore, isEqual } from "date-fns";
-const BookingPopup = ({open, onClose, room}) => {
+const BookingPopup = ({ open, onClose, room }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [error, setError] = useState("");
@@ -30,23 +30,32 @@ const BookingPopup = ({open, onClose, room}) => {
             return duration * room.price_per_month;
         }
     }
+    const toLocaleDateString = (date) => {
+        if (!(date instanceof Date) || isNaN(date.getTime())) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); 
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
     const handleBook = async () => {
         try {
+            console.log("Start Date raw:", startDate);
+            console.log("End Date raw:", endDate);
             const token = localStorage.getItem("token");
             if (!startDate || !endDate) {
                 toast.error("Please select both start and end date");
                 return;
             }
             const isValidDateRange = isBefore(startDate, endDate);
-            if(!isValidDateRange || isEqual(startDate,endDate)){
+            if (!isValidDateRange || isEqual(startDate, endDate)) {
                 toast.error("Start date must be before end date");
                 return;
             }
             const bookingResponse = await axios.post("http://localhost:8080/bookings", {
                 room_id: room.id,
                 user_id: user.id,
-                start_date: startDate,
-                end_date: endDate,
+                start_date: toLocaleDateString(startDate),
+                end_date: toLocaleDateString(endDate),
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });

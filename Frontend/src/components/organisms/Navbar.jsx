@@ -47,6 +47,9 @@ const Navbar = () => {
                         {user?.role === "customer" && (
                             <Tab label="History" value="/customer/bookings" onClick={() => navigate("/customer/bookings")} sx={{ "&:focus": { outline: "none" } }}/>
                         )}
+                        {user?.role === "customer" && (
+                            <Tab label="Complaints" value="/customer/complaints" onClick={() => navigate("/customer/complaints")} sx={{  "&:focus": { outline: "none"} }}/>
+                        )}
                     </Tabs>
                 </Box>
 
