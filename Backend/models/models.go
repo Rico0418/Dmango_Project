@@ -45,6 +45,12 @@ type Booking struct {
 	Status     string    `json:"status"` // "pending", "confirmed", "canceled"
 	CreatedAt  time.Time `json:"created_at"`
 }
+type BookingRequest struct {
+	RoomID    int    `json:"room_id"`
+	UserID    int    `json:"user_id"`
+	StartDate string `json:"start_date"` // Expecting "YYYY-MM-DD"
+	EndDate   string `json:"end_date"`
+}
 type Payment struct {
 	ID        int       `json:"id"`
 	BookingID int       `json:"booking_id"`

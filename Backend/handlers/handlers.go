@@ -6,6 +6,7 @@ import (
 	"dmangoapp/utils"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
@@ -263,6 +264,41 @@ func (h *Handler) GetAllComplaints(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, complaints)
 }
+func (h *Handler) GetComplaintByUserID(c *gin.Context) {
+	userID := c.Param("user_id")
+	
+	query := `
+		SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		FROM complaints c
+		INNER JOIN rooms rm ON c.room_id = rm.id
+		INNER JOIN users u ON c.user_id = u.id
+		WHERE c.user_id = $1
+		ORDER BY c.created_at DESC
+	`
+	rows, err := h.DB.Query(context.Background(),query,userID)
+	
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "failed to fetch complaints"})
+		return
+	}
+	defer rows.Close()
+	
+	var complaints []models.Complaint
+	for rows.Next() {
+		var complaint models.Complaint
+		err := rows.Scan(
+			&complaint.ID, &complaint.RoomID, &complaint.RoomNumber,
+			&complaint.UserID, &complaint.UserEmail, &complaint.Description,
+			&complaint.Status, &complaint.CreatedAt,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning data"})
+			return
+		}
+		complaints = append(complaints, complaint)
+	}
+	c.JSON(http.StatusOK, complaints)
+}
 func (h *Handler) GetDetailComplaint(c *gin.Context) {
 	id := c.Param("id")
 	roomNumber := c.Query("room_number")
@@ -441,51 +477,39 @@ func (h *Handler) GetDetailBooking(c *gin.Context) {
 }
 
 func (h *Handler) CreateBooking(c *gin.Context) {
-	var booking models.Booking
-	if err := c.ShouldBindJSON(&booking); err != nil {
+	var req models.BookingRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	err := h.DB.QueryRow(context.Background(), `
+	layout := "2006-01-02"
+	startDate, err := time.Parse(layout, req.StartDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid start date"})
+		return
+	}
+	endDate, err := time.Parse(layout, req.EndDate)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid end date"})
+		return
+	}
+
+	var bookingID int
+	err = h.DB.QueryRow(context.Background(), `
 		INSERT INTO bookings (room_id, user_id, start_date, end_date, created_at)
 		VALUES ($1, $2, $3, $4, NOW())
 		RETURNING id`,
-		booking.RoomID, booking.UserID, booking.StartDate, booking.EndDate).Scan(&booking.ID)
+		req.RoomID, req.UserID, startDate, endDate).Scan(&bookingID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Booking created successfully", "booking_id": booking.ID})
+	c.JSON(http.StatusCreated, gin.H{"message": "Booking created successfully", "booking_id": bookingID})
 }
-// func (h *Handler) UpdateBookingStatus(c *gin.Context) {
-// 	id := c.Param("id")
-// 	var booking models.Booking
 
-// 	if err := c.ShouldBindJSON(&booking); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	result, err := h.DB.Exec(context.Background(), `
-// 		UPDATE bookings 
-// 		SET status = $1 
-// 		WHERE id = $2`, booking.Status, id)
-
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-
-// 	if result.RowsAffected() == 0 {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusOK, gin.H{"message": "Booking updated successfully"})
-// }
 func (h *Handler) DeleteBooking(c *gin.Context) {
 	id := c.Param("id")
 
@@ -610,7 +634,9 @@ func (h *Handler) DeletePayment(c *gin.Context) {
 
 	
 	var bookingID int
-	err = tx.QueryRow(context.Background(), "SELECT booking_id FROM payments WHERE id = $1", id).Scan(&bookingID)
+	var roomID int
+	err = tx.QueryRow(context.Background(), `SELECT b.id, b.room_id
+	FROM payments p JOIN bookings b ON p.booking_id = b.id WHERE p.id=$1`, id).Scan(&bookingID,&roomID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
 		return
@@ -629,6 +655,12 @@ func (h *Handler) DeletePayment(c *gin.Context) {
 	_, err = tx.Exec(context.Background(), "DELETE FROM bookings WHERE id = $1", bookingID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete booking"})
+		return
+	}
+
+	_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'available' WHERE id = $1", roomID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update room status"})
 		return
 	}
 

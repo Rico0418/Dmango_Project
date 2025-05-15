@@ -43,7 +43,7 @@ func main(){
 		protected.PUT("/users/password", h.UpdatePassword)
 
 		protected.GET("/complaints",h.GetAllComplaints)
-		protected.GET("/complaints/:id",h.GetDetailComplaint)
+		protected.GET("/complaints/user/:user_id",h.GetComplaintByUserID)
 		protected.POST("/complaints",h.CreateComplaint)
 		protected.PUT("/complaints/status/:id",h.UpdateComplaintStatus)
 		protected.PUT("/complaints/description/:id",h.UpdateComplaintDescription)
