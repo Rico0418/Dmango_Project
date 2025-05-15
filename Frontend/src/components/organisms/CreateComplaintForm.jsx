@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 
 
-const CreateComplaintDialog = ({ open, onClose, roomId }) => {
+const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) => {
     const { user } = useAuth();
     const [description, setDescription] = useState("");
     const [alert, setAlert] = useState({ open: false, type: "success", message: "" });
@@ -31,6 +31,9 @@ const CreateComplaintDialog = ({ open, onClose, roomId }) => {
             }});
             setAlert({ open: true, type: "success", message: "Complaint created successfully." });
             setDescription("");
+            if (onComplaintCreated) {
+            onComplaintCreated();
+            }
             onClose();
         } catch (err) {
             console.error(err);
