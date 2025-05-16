@@ -8,15 +8,13 @@ import {
     DialogActions,
     TextField,
     Button,
-    Snackbar,
-    Alert,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 
 const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) => {
     const { user } = useAuth();
     const [description, setDescription] = useState("");
-    const [alert, setAlert] = useState({ open: false, type: "success", message: "" });
 
     const handleSubmit = async () => {
         try {
@@ -29,7 +27,7 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
             const res = await axios.post("http://localhost:8080/complaints", payload,{headers: {
                 Authorization: `Bearer ${token}`
             }});
-            setAlert({ open: true, type: "success", message: "Complaint created successfully." });
+            toast.success("Complaint created successfully");
             setDescription("");
             if (onComplaintCreated) {
             onComplaintCreated();
@@ -37,14 +35,10 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
             onClose();
         } catch (err) {
             console.error(err);
-            setAlert({
-                open: true,
-                type: "error",
-                message: "Failed to create complaint",
-            });
+            toast.error("failed to create complaint")
         }
     };
-    const handleCloseAlert = () => setAlert({ ...alert, open: false });
+
     return (
         <>
             <Dialog open={open} onClose={onClose} fullWidth>
@@ -71,11 +65,6 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
                 </DialogActions>
             </Dialog>
 
-            <Snackbar open={alert.open} autoHideDuration={4000} onClose={handleCloseAlert}>
-                <Alert severity={alert.type} onClose={handleCloseAlert} sx={{ width: "100%" }}>
-                    {alert.message}
-                </Alert>
-            </Snackbar>
         </>
     );
 };

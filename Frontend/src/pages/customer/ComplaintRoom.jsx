@@ -6,13 +6,18 @@ import { Tabs, Tab, Box, Typography, Button, Card, CardContent, Alert } from "@m
 import axios from "axios";
 import CreateComplaintDialog from "../../components/organisms/CreateComplaintForm";
 import { toast } from "react-toastify";
+import EditComplaintForm from "../../components/organisms/EditComplaintForm";
 const ComplaintRoom = () => {
     const { user } = useAuth();
     const [tabIndex, setTabIndex] = useState(0);
     const [payments, setPayments] = useState([]);
     const [complaints, setComplaints] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const today = new Date();
+
     const fetchComplaints = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -24,6 +29,7 @@ const ComplaintRoom = () => {
             console.error("Error fetching complaints:", err);
         }
     };
+
     useEffect(() => {
         if (!user || !user.id) return;
         const fetchPayments = async () => {
@@ -58,10 +64,27 @@ const ComplaintRoom = () => {
             toast.error("Delete Complaint failed");
         }
     }
+
+    const handleUpdateComplaint = async (id, description) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.put(`http://localhost:8080/complaints/description/${id}`,
+                { description },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success("Complaint updated successfully");
+            fetchComplaints();
+            setEditDialogOpen(false);
+        } catch (err) {
+            console.log(err);
+            toast.error("Update complaint failed");
+        }
+    };
+
     return (
         <div>
             <Navbar />
-            <div style={{ padding: "2rem",minHeight: "75vh" }}>
+            <div style={{ padding: "2rem", minHeight: "75vh" }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} centered>
                     <Tab label="My Booked Rooms" sx={{ "&:focus": { outline: "none" } }} />
                     <Tab label="My Complaints" sx={{ "&:focus": { outline: "none" } }} />
@@ -72,31 +95,41 @@ const ComplaintRoom = () => {
                         {payments.length === 0 ? (
                             <Typography>No bookings available.</Typography>
                         ) : (
-                            payments.map((payment) => (
-                                <Card key={payment.id} sx={{  mb: 3, borderRadius: 2,
-                                boxShadow: 3, border: "1px solid #e0e0e0", }}>
-                                    <CardContent>
-                                        <Typography variant="h6">
-                                            Room #{payment.booking.room_number.trim()}
-                                        </Typography>
-                                        <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
-                                        <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
-                                        {new Date(payment.booking.start_date).toLocaleDateString() === new Date().toLocaleDateString() && (
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                sx={{ mt: 2 }}
-                                                onClick={() => {
-                                                    setSelectedRoomId(payment.booking.room_id);
-                                                    setOpenDialog(true);
-                                                }}
-                                            >
-                                                Create Complaint
-                                            </Button>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))
+                            payments.map((payment) => {
+                                const start = new Date(payment.booking.start_date);
+                                const end = new Date(payment.booking.end_date);
+                                const isWithinStay =
+                                    today >= new Date(start.setHours(0, 0, 0, 0)) &&
+                                    today <= new Date(end.setHours(23, 59, 59, 999));
+                                return (
+                                    <Card key={payment.id} sx={{
+                                        mb: 3, borderRadius: 2,
+                                        boxShadow: 3, border: "1px solid #e0e0e0",
+                                    }}>
+                                        <CardContent>
+                                            <Typography variant="h6">
+                                                Room #{payment.booking.room_number.trim()}
+                                            </Typography>
+                                            <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
+                                            <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
+                                            {isWithinStay && (
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    sx={{ mt: 2 }}
+                                                    onClick={() => {
+                                                        setSelectedRoomId(payment.booking.room_id);
+                                                        setOpenDialog(true);
+                                                    }}
+                                                >
+                                                    Create Complaint
+                                                </Button>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
+                                )
+                            })
                         )}
                     </Box>
                 )}
@@ -106,34 +139,58 @@ const ComplaintRoom = () => {
                         {complaints.length === 0 ? (
                             <Typography>No complaints found.</Typography>
                         ) : (
-                            complaints.map((complaint) => (
-                                <Card key={complaint.id} sx={{  mb: 3, borderRadius: 2,
-                                    boxShadow: 3, border: "1px solid #e0e0e0", }}>
-                                    <CardContent>
-                                        <Typography variant="h6">Room #{complaint.room_number}</Typography>
-                                        <Typography>Description: {complaint.description}</Typography>
-                                        <Typography>
-                                            Date: {new Date(complaint.created_at).toLocaleDateString()}
-                                        </Typography>
-                                        <Typography>Status: {complaint.status}</Typography>
+                            complaints.map((complaint) => {
+                                const relatedBooking = payments.find(payment =>
+                                    payment.booking.room_id === complaint.room_id
+                                );
+                                let isWithinStay = false;
+                                if(relatedBooking){
+                                    const start = new Date(relatedBooking.booking.start_date);
+                                    const end = new Date(relatedBooking.booking.end_date);
+                                    const startDate = new Date(start.setHours(0,0,0,0));
+                                    const endDate = new Date(end.setHours(23,59,59,999));
+                                    isWithinStay = today >= startDate && today <= endDate;
+                                }
+                                return (
+                                    <Card key={complaint.id} sx={{
+                                        mb: 3, borderRadius: 2,
+                                        boxShadow: 3, border: "1px solid #e0e0e0",
+                                    }}>
+                                        <CardContent>
+                                            <Typography variant="h6">Room #{complaint.room_number}</Typography>
+                                            <Typography>Description: {complaint.description}</Typography>
+                                            <Typography>
+                                                Date: {new Date(complaint.created_at).toLocaleDateString()}
+                                            </Typography>
+                                            <Typography>Status: {complaint.status}</Typography>
 
-                                        <Box sx={{ mt: 2 }}>
-                                            {complaint.status === "Pending" && (
-                                                <Button variant="contained" color="warning" sx={{ mr: 1 }}>
-                                                    Edit
+                                            <Box sx={{ mt: 2 }}>
+                                                {complaint.status === "Pending" && isWithinStay && (
+                                                    <Button variant="contained" color="warning" sx={{ mr: 1 }} onClick={() => {
+                                                        setSelectedComplaint(complaint);
+                                                        setEditDialogOpen(true);
+                                                    }}>
+                                                        Edit
+                                                    </Button>
+                                                )}
+                                                <Button variant="contained" color="error" onClick={() => handleDeleteComplaint(complaint.id)}>
+                                                    Delete
                                                 </Button>
-                                            )}
-                                            <Button variant="contained" color="error" onClick={() => handleDeleteComplaint(complaint.id)}>
-                                                Delete
-                                            </Button>
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            ))
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                )
+                            })
                         )}
                     </Box>
                 )}
             </div>
+            <EditComplaintForm
+                open={editDialogOpen}
+                onClose={() => setEditDialogOpen(false)}
+                complaint={selectedComplaint}
+                onSubmit={handleUpdateComplaint}
+            />
             <CreateComplaintDialog
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
