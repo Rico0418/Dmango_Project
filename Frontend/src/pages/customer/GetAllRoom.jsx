@@ -14,6 +14,12 @@ const GetAllRoom = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("token");
+                console.log(token);
+                await axios.put("http://localhost:8080/rooms/update-status", {},{
+                    headers: {
+                    Authorization: `Bearer ${token}`,
+                    },
+                });
                 const response = await axios.get("http://localhost:8080/rooms", {
                     headers: {
                         Authorization: `Bearer ${token}`,
