@@ -32,6 +32,8 @@ func main(){
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
+		protected.PUT("/rooms/update-status", h.UpdateRoomStatus)
+
 		protected.GET("/guest_houses",h.GetAllGuestHouses)
 		protected.GET("/guest_houses/:id", h.GetDetailGuestHouses)
 

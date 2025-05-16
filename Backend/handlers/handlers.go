@@ -123,6 +123,25 @@ func (h *Handler) UpdateRoomPrice(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Room updated successfully"})
 }
 
+func (h *Handler) UpdateRoomStatus( c *gin.Context){
+	fmt.Println(">> Entered UpdateRoomStatus handler")
+	result,err := h.DB.Exec(context.Background(),
+         `UPDATE rooms
+		 SET status = 'available'
+		 WHERE id IN(
+		    SELECT room_id FROM bookings WHERE end_date < CURRENT_DATE
+		) AND status != 'available'`)
+	if err != nil {
+		fmt.Println("SQL Error:", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No rooms status updated"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Room status updated successfully"})	
+}
 
 // Handler for users
 func (h *Handler) Register(c *gin.Context) {
