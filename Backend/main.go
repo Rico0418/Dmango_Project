@@ -60,6 +60,7 @@ func main(){
 
 		protected.GET("/bookings",Bh.GetAllBookings)
 		protected.GET("/bookings/:id", Bh.GetDetailBooking)
+		protected.GET("/bookings/room/:room_id",Bh.GetDetailBookingDate)
 		protected.POST("/bookings", Bh.CreateBooking)
 		protected.DELETE("/bookings/:id", Bh.DeleteBooking)
 

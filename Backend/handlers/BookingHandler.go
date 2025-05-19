@@ -14,6 +14,7 @@ import (
 type BookingHandler struct {
 	DB *pgxpool.Pool
 }
+
 func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 	rows, err := h.DB.Query(context.Background(),
 		`SELECT b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status,b.created_at
@@ -21,14 +22,14 @@ func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 		INNER JOIN rooms rm ON b.room_id = rm.id
 		INNER JOIN users u ON b.user_id = u.id`)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer rows.Close()
 	var bookings []models.Booking
-	for rows.Next(){
+	for rows.Next() {
 		var booking models.Booking
-		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber, 
+		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber,
 			&booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status, &booking.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -64,6 +65,39 @@ func (h *BookingHandler) GetDetailBooking(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, booking)
+}
+func (h *BookingHandler) GetDetailBookingDate(c *gin.Context) {
+	id := c.Param("room_id")
+
+	query := `
+		SELECT b.room_id, b.start_date, b.end_date
+		FROM bookings b WHERE b.room_id = $1 AND b.status = 'confirmed'
+	`
+	rows, err := h.DB.Query(context.Background(), query, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var bookings []models.Booking
+
+	for rows.Next() {
+		var booking models.Booking
+		err := rows.Scan(&booking.RoomID, &booking.StartDate, &booking.EndDate)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		bookings = append(bookings, booking)
+	}
+
+	if len(bookings) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No confirmed bookings for this room"})
+		return
+	}
+
+	c.JSON(http.StatusOK, bookings)
 }
 
 func (h *BookingHandler) CreateBooking(c *gin.Context) {
