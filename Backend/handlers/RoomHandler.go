@@ -109,6 +109,27 @@ func (h *RoomHandler) UpdateRoomStatus( c *gin.Context){
 	c.JSON(http.StatusOK, gin.H{"message": "Room status updated successfully"})	
 }
 
+func (h *RoomHandler) MarkRoomAsBookedToday(c *gin.Context){
+	result, err := h.DB.Exec(context.Background(),`
+		UPDATE rooms
+		SET status = 'booked'
+		WHERE id IN (
+			SELECT room_id
+			FROM bookings
+			WHERE start_date = CURRENT_DATE AND status = 'confirmed'
+		)
+	`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No rooms status updated"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Rooms booked for today's check-ins"})
+}
+
 func (h * RoomHandler) UpdateRoomPriceByType(c *gin.Context) {
 	var req struct {
 		Type string `json:"type"`

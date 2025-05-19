@@ -212,12 +212,6 @@ func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 			return
 		}
 
-		_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'booked' WHERE id = $1", roomID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
 	case "canceled":
 		// Payment canceled → Cancel booking, keep room available
 		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'canceled' WHERE id = $1", bookingID)
