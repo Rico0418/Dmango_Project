@@ -9,6 +9,11 @@ func main(){
 	config.ConnectDB()
 	defer config.DB.Close()
 	h := &handlers.Handler{DB: config.DB}
+	Uh := &handlers.UserHandler{DB: config.DB}
+	Rh := &handlers.RoomHandler{DB: config.DB}
+	Ch := &handlers.ComplaintsHandler{DB: config.DB}
+	Bh := &handlers.BookingHandler{DB: config.DB}
+	Gh := &handlers.GuestHouseHandler{DB: config.DB}
 	r := gin.Default()
 	r.Use(func (c *gin.Context)  {
 		c.Writer.Header().Set("Access-Control-Allow-Origin","*")
@@ -27,34 +32,34 @@ func main(){
 		}
 		c.Next()
 	})
-	r.POST("/register", h.Register)
-	r.POST("/login",h.Login)
+	r.POST("/register", Uh.Register)
+	r.POST("/login",Uh.Login)
 	protected := r.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 	{
-		protected.PUT("/rooms/update-status", h.UpdateRoomStatus)
 
-		protected.GET("/guest_houses",h.GetAllGuestHouses)
-		protected.GET("/guest_houses/:id", h.GetDetailGuestHouses)
+		protected.GET("/guest_houses",Gh.GetAllGuestHouses)
+		protected.GET("/guest_houses/:id", Gh.GetDetailGuestHouses)
 
-		protected.GET("/rooms",h.GetAllRooms)
-		protected.GET("/rooms/:id",h.GetDetailRoom)
-		protected.PUT("/rooms/:id",h.UpdateRoomPrice)
+		protected.GET("/rooms",Rh.GetAllRooms)
+		protected.GET("/rooms/:id",Rh.GetDetailRoom)
+		protected.PUT("/rooms/:id",Rh.UpdateRoomPrice)
+		protected.PUT("/rooms/update-status", Rh.UpdateRoomStatus)
 
-		protected.GET("/users/detail/:id",h.GetDetailUser)
-		protected.PUT("/users/password", h.UpdatePassword)
+		protected.GET("/users/detail/:id",Uh.GetDetailUser)
+		protected.PUT("/users/password", Uh.UpdatePassword)
 
-		protected.GET("/complaints",h.GetAllComplaints)
-		protected.GET("/complaints/user/:user_id",h.GetComplaintByUserID)
-		protected.POST("/complaints",h.CreateComplaint)
-		protected.PUT("/complaints/status/:id",h.UpdateComplaintStatus)
-		protected.PUT("/complaints/description/:id",h.UpdateComplaintDescription)
-		protected.DELETE("/complaints/:id",h.DeleteComplaint)
+		protected.GET("/complaints",Ch.GetAllComplaints)
+		protected.GET("/complaints/user/:user_id",Ch.GetComplaintByUserID)
+		protected.POST("/complaints",Ch.CreateComplaint)
+		protected.PUT("/complaints/status/:id",Ch.UpdateComplaintStatus)
+		protected.PUT("/complaints/description/:id",Ch.UpdateComplaintDescription)
+		protected.DELETE("/complaints/:id",Ch.DeleteComplaint)
 
-		protected.GET("/bookings",h.GetAllBookings)
-		protected.GET("/bookings/:id", h.GetDetailBooking)
-		protected.POST("/bookings", h.CreateBooking)
-		protected.DELETE("/bookings/:id", h.DeleteBooking)
+		protected.GET("/bookings",Bh.GetAllBookings)
+		protected.GET("/bookings/:id", Bh.GetDetailBooking)
+		protected.POST("/bookings", Bh.CreateBooking)
+		protected.DELETE("/bookings/:id", Bh.DeleteBooking)
 
 		protected.GET("/payments",h.GetAllPayments)
 		protected.GET("/payments/user/:user_id",h.GetPaymentDetailbyUserID)
