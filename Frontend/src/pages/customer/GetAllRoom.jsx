@@ -20,6 +20,11 @@ const GetAllRoom = () => {
                     Authorization: `Bearer ${token}`,
                     },
                 });
+                await axios.put("http://localhost:8080/rooms/update-booked", {},{
+                    headers: {
+                    Authorization: `Bearer ${token}`,
+                    },
+                });
                 const response = await axios.get("http://localhost:8080/rooms", {
                     headers: {
                         Authorization: `Bearer ${token}`,
