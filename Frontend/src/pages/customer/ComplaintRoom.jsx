@@ -112,7 +112,7 @@ const ComplaintRoom = () => {
                                             </Typography>
                                             <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
                                             <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
-                                            {isWithinStay && (
+                                            {payment.status !== "Pending" && payment.status !== "Canceled" && isWithinStay && (
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
