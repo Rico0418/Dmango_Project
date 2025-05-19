@@ -108,3 +108,36 @@ func (h *RoomHandler) UpdateRoomStatus( c *gin.Context){
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Room status updated successfully"})	
 }
+
+func (h * RoomHandler) UpdateRoomPriceByType(c *gin.Context) {
+	var req struct {
+		Type string `json:"type"`
+		Price float64 `json:"price"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if req.Type != "daily" && req.Type != "monthly" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Type must be 'daily' or 'monthly' "})
+		return
+	}
+	var query string
+	if req.Type == "daily" {
+		query = `UPDATE rooms SET price_per_day = $1 WHERE type = 'daily'`
+	}else{
+		query = `UPDATE rooms SET price_per_month = $1 WHERE type = 'monthly'`
+	}
+	result, err := h.DB.Exec(context.Background(), query, req.Price)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No rooms of this type found to update"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Room prices updated successfully"})
+}
