@@ -5,39 +5,45 @@ import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
+
 const ManageRooms = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
     const navigate = useNavigate();
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                await axios.put("http://localhost:8080/rooms/update-status", {},{
-                    headers: {
+    const [openPriceDialogDaily, setOpenPriceDialogDaily] = useState(false);
+    const [openPriceDialogMonthly, setOpenPriceDialogMonthly] = useState(false);
+    const [priceForm, setPriceForm] = useState("");
+    const [priceFormMonthly, setPriceFormMonthly] = useState("");
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.put("http://localhost:8080/rooms/update-status", {}, {
+                headers: {
                     Authorization: `Bearer ${token}`,
-                    },
-                });
-                const response = await axios.get("http://localhost:8080/rooms", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const formattedRows = response.data.map((room) => ({
-                    id: room.id,
-                    guest_house_id: room.guest_house_id,
-                    room_number: room.room_number,
-                    type: room.type,
-                    price_per_day: room.price_per_day,
-                    price_per_month: room.price_per_month,
-                    status: room.status,
-                    actions: getDynamicActions(room),
-                }));
-                setRows(formattedRows);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+                },
+            });
+            const response = await axios.get("http://localhost:8080/rooms", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const formattedRows = response.data.map((room) => ({
+                id: room.id,
+                guest_house_id: room.guest_house_id,
+                room_number: room.room_number,
+                type: room.type,
+                price_per_day: room.price_per_day,
+                price_per_month: room.price_per_month,
+                status: room.status,
+                actions: getDynamicActions(room),
+            }));
+            setRows(formattedRows);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    useEffect(() => {
         fetchData();
     }, []);
     const getDynamicActions = (room) => {
@@ -80,14 +86,92 @@ const ManageRooms = () => {
                     <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
-                    <Button onClick={() => handleSort("status")} variant="contained">
+                    <Button onClick={() => handleSort("status")} variant="contained"  sx={{ marginRight: 2 }}>
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                    </Button>
+                    <Button onClick={() => setOpenPriceDialogDaily(true)} variant="contained"  sx={{ marginRight: 2 }}>
+                        Change Daily Room Price
+                    </Button>
+                    <Button onClick={() => setOpenPriceDialogMonthly(true)} variant="contained">
+                        Change Monthly Room Price
                     </Button>
                     <Box sx={{ mt: 3 }}>
                         <TableRoomAdmin rows={sortedRows} />
                     </Box>
                 </Paper>
             </Container>
+            <Dialog open={openPriceDialogDaily} onClose={() => setOpenPriceDialogDaily(false)}>
+                <DialogTitle>Change Daily Room Price</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="New Price"
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        value={priceForm}
+                        onChange={(e) => setPriceForm(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPriceDialogDaily(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={async () => {
+                        try {
+                            const token = localStorage.getItem("token");
+                            await axios.put(`http://localhost:8080/rooms/update-price`, {
+                                type: "daily",
+                                price: parseFloat(priceForm),
+                            }, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                }
+                            });
+                            setOpenPriceDialogDaily(false);
+                            setPriceForm("");
+                            fetchData();
+                        } catch (err) {
+                            console.error("Failed to update price", err);
+                        }
+                    }}>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+             <Dialog open={openPriceDialogMonthly} onClose={() => setOpenPriceDialogMonthly(false)}>
+                <DialogTitle>Change Monthly Room Price</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="New Price"
+                        type="number"
+                        fullWidth
+                        margin="normal"
+                        value={priceFormMonthly}
+                        onChange={(e) => setPriceFormMonthly(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPriceDialogMonthly(false)}>Cancel</Button>
+                    <Button variant="contained" onClick={async () => {
+                        try {
+                            const token = localStorage.getItem("token");
+                            await axios.put(`http://localhost:8080/rooms/update-price`, {
+                                type: "monthly",
+                                price: parseFloat(priceFormMonthly),
+                            }, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                }
+                            });
+                            setOpenPriceDialogMonthly(false);
+                            setPriceFormMonthly("");
+                            fetchData();
+                        } catch (err) {
+                            console.error("Failed to update price", err);
+                        }
+                    }}>
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Footer />
         </div>
     );
