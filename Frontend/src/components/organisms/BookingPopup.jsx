@@ -4,19 +4,47 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
-import { isBefore, isEqual } from "date-fns";
+import { isBefore, isEqual, startOfDay } from "date-fns";
 const BookingPopup = ({ open, onClose, room }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const { user } = useAuth();
+    const [bookedRanges, setBookedRanges] = useState([]);
 
+    useEffect(() => {
+        const fetchBookedDates = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await axios.get(
+                    `http://localhost:8080/bookings/room/${room.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+                );
+                if (Array.isArray(response.data)) {
+                    const ranges = response.data.map(b => [
+                        new Date(b.start_date),
+                        new Date(b.end_date),
+                    ]);
+                    setBookedRanges(ranges);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        if (room?.id) {
+            fetchBookedDates();
+        }
+    }, [room])
+    console.log(bookedRanges);
     const calculateAmount = () => {
         const start = new Date(startDate);
         const end = new Date(endDate);
@@ -33,10 +61,16 @@ const BookingPopup = ({ open, onClose, room }) => {
     const toLocaleDateString = (date) => {
         if (!(date instanceof Date) || isNaN(date.getTime())) return null;
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+    const isDateBooked = (date) => {
+        const normalized = startOfDay(date);
+        return bookedRanges.some(([start, end]) => {
+            return normalized >= startOfDay(start) && normalized <= startOfDay(end);
+        });
+    };
     const handleBook = async () => {
         try {
             console.log("Start Date raw:", startDate);
@@ -82,12 +116,14 @@ const BookingPopup = ({ open, onClose, room }) => {
                         label="Start Date"
                         value={startDate}
                         onChange={(newValue) => setStartDate(newValue)}
+                        shouldDisableDate={isDateBooked}
                         renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
                     />
                     <DatePicker
                         label="End Date"
                         value={endDate}
                         onChange={(newValue) => setEndDate(newValue)}
+                        shouldDisableDate={isDateBooked}
                         renderInput={(params) => <TextField fullWidth margin="normal" {...params} />}
                     />
                 </LocalizationProvider>
