@@ -15,22 +15,13 @@ const GetAllRoom = () => {
             try {
                 const token = localStorage.getItem("token");
                 console.log(token);
-                await axios.put("http://localhost:8080/rooms/update-status", {},{
-                    headers: {
-                    Authorization: `Bearer ${token}`,
-                    },
-                });
-                await axios.put("http://localhost:8080/rooms/update-booked", {},{
-                    headers: {
-                    Authorization: `Bearer ${token}`,
-                    },
-                });
                 const response = await axios.get("http://localhost:8080/rooms", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setRooms(response.data);
+                const sortedRooms = response.data.sort((a, b) => a.id - b.id);
+                setRooms(sortedRooms);
             } catch (error) {
                 console.error(error);
             }
@@ -45,11 +36,7 @@ const GetAllRoom = () => {
             {rooms.map((room) => (
                 <Paper key={room.id}
                     elevation={3}
-                    onClick={() => {
-                        if (room.status.trim() !== "booked") {
-                          navigate(`/customer/rooms/${room.id}`);
-                        }
-                      }}
+                    onClick={() => navigate(`/customer/rooms/${room.id}`)}
                     sx={{
                         width: 100,
                         height: 100,
@@ -57,12 +44,11 @@ const GetAllRoom = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         flexDirection: "column",
-                        backgroundColor: room.status.trim() === "booked" ? "#e57373" : "#81c784",
-                        cursor: room.status.trim() === "booked" ? "not-allowed" : "pointer",
-                        pointerEvents: room.status.trim() === "booked" ? "none" : "auto",
+                        backgroundColor: "#F2C078",
+                        cursor: "pointer",
                     }}>
                     <TypographyTemplate variant="body1">{room.room_number.trim()}</TypographyTemplate>
-                    <TypographyTemplate variant="caption">{room.status.trim()}</TypographyTemplate>
+                    <TypographyTemplate variant="caption">{room.type.trim()}</TypographyTemplate>
                 </Paper>
             ))}
         </Box>

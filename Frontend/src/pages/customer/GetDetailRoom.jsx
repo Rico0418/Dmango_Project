@@ -31,11 +31,7 @@ const GetDetailRoom = () => {
                 });
                 const data = response.data;
 
-                if (data.status.trim() === "booked") {
-                    navigate("/customer/rooms");
-                } else {
-                    setRoom(data);
-                }
+                setRoom(data);
             } catch (error) {
                 console.error("Failed to fetch room details:", room)
             }
