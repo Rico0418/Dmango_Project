@@ -99,6 +99,12 @@ const BookingPopup = ({ open, onClose, room }) => {
     return isBooked;
   };
 
+  const shouldDisableDate = (date) => {
+    const today = startOfDay(new Date());
+    const normalizedDate = startOfDay(new Date());
+    return  isBefore(normalizedDate,today) || isDateBooked(date);
+  }
+
   const handleBook = async () => {
     try {
       console.log("Start Date raw:", startDate);
@@ -146,23 +152,31 @@ const BookingPopup = ({ open, onClose, room }) => {
 
   const renderDayWithTooltip = ({ day, ...pickersDayProps }) => {
     const isBooked = isDateBooked(day);
-
+    const isPast = isBefore(startOfDay(day), startOfDay(new Date()));
     const dayComponent = (
       <PickersDay
         {...pickersDayProps}
         day={day}
-        disabled={isBooked}
+        disabled={isBooked || isPast}
         sx={{
           ...(isBooked && {
             bgcolor: "#ccc",
             color: "#888",
           }),
+          ...(isPast && {
+            bgcolor: "#f0f0f0",
+            color: "#aaa",
+          })
         }}
       />
     );
 
     return isBooked ? (
       <Tooltip title="Already booked" arrow>
+        <span style={{ display: "inline-block" }}>{dayComponent}</span>
+      </Tooltip>
+    ) : isPast ? (
+      <Tooltip title="Cannot select past dates" arrow>
         <span style={{ display: "inline-block" }}>{dayComponent}</span>
       </Tooltip>
     ) : (
@@ -180,7 +194,7 @@ const BookingPopup = ({ open, onClose, room }) => {
             label="Start Date"
             value={startDate}
             onChange={(newValue) => setStartDate(newValue)}
-            shouldDisableDate={isDateBooked}
+            shouldDisableDate={shouldDisableDate}
             slots={{ day: renderDayWithTooltip }}
           />
           <Typography>End Date:</Typography>
@@ -188,7 +202,7 @@ const BookingPopup = ({ open, onClose, room }) => {
             label="End Date"
             value={endDate}
             onChange={(newValue) => setEndDate(newValue)}
-            shouldDisableDate={isDateBooked}
+            shouldDisableDate={shouldDisableDate}
             slots={{ day: renderDayWithTooltip }}
           />
         </LocalizationProvider>
