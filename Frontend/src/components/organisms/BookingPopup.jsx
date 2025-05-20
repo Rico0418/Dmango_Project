@@ -105,6 +105,16 @@ const BookingPopup = ({ open, onClose, room }) => {
     return  isBefore(normalizedDate,today) || isDateBooked(date);
   }
 
+  const hasDateRangeOverlap = (start, end) => {
+    const normalizedStart = startOfDay(start);
+    const normalizedEnd = startOfDay(end);
+    return bookedRanges.some(([bookedStart, bookedEnd]) => {
+        const normalizedBookedStart = startOfDay(bookedStart);
+        const normalizedBookedEnd = startOfDay(bookedEnd);
+        return normalizedStart <= normalizedBookedEnd && normalizedEnd >= normalizedBookedStart;
+    });
+  };
+
   const handleBook = async () => {
     try {
       console.log("Start Date raw:", startDate);
@@ -117,6 +127,10 @@ const BookingPopup = ({ open, onClose, room }) => {
       const isValidDateRange = isBefore(startDate, endDate);
       if (!isValidDateRange || isEqual(startDate, endDate)) {
         toast.error("Start date must be before end date");
+        return;
+      }
+      if (hasDateRangeOverlap(startDate,endDate)){
+        toast.error("Selected date range overlaps with an existing booking");
         return;
       }
       const bookingResponse = await axios.post(
