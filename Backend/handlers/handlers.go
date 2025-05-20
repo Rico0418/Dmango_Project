@@ -146,12 +146,6 @@ func (h *Handler) DeletePayment(c *gin.Context) {
 		return
 	}
 
-	_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'available' WHERE id = $1", roomID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update room status"})
-		return
-	}
-
 	if err := tx.Commit(context.Background()); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit transaction"})
 		return
@@ -215,12 +209,6 @@ func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 	case "canceled":
 		// Payment canceled → Cancel booking, keep room available
 		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'canceled' WHERE id = $1", bookingID)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		_, err = tx.Exec(context.Background(), "UPDATE rooms SET status = 'available' WHERE id = $1", roomID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
