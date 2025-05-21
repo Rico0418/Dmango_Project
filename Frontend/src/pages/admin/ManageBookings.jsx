@@ -5,34 +5,36 @@ import Footer from "../../components/organisms/Footer";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import TableBookingAdmin from "../../components/organisms/TableBookingAdmin";
+import CreateBookingAdmin from "../../components/organisms/CreateBookingAdmin";
 const ManageBookings = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+    const [openCreateDialog, setOpenCreateDialog] = useState(false);
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get("http://localhost:8080/bookings", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const formattedRows = response.data.map((booking) => ({
+                id: booking.id,
+                room_number: booking.room_number,
+                email: booking.email,
+                start_date: booking.start_date.substring(0, 10),
+                end_date: booking.end_date.substring(0, 10),
+                created_at: booking.created_at.substring(0, 10),
+                status: booking.status,
+                actions: getDynamicActions(booking),
+            }));
+            setRows(formattedRows);
+            console.log("Formatted Rows: ", formattedRows);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/bookings", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const formattedRows = response.data.map((booking) => ({
-                    id: booking.id,
-                    room_number: booking.room_number,
-                    email: booking.email,
-                    start_date: booking.start_date.substring(0, 10),
-                    end_date: booking.end_date.substring(0, 10),
-                    created_at: booking.created_at.substring(0, 10),
-                    status: booking.status,
-                    actions: getDynamicActions(booking),
-                }));
-                setRows(formattedRows);
-                console.log("Formatted Rows: ", formattedRows);
-            } catch (error) {
-                console.error(error);
-            }
-        };
         fetchData();
     }, []);
     const getDynamicActions = (booking) => {
@@ -74,6 +76,9 @@ const ManageBookings = () => {
             console.error(error);
         }
     };
+    const handleBookingCreated = () => {
+        fetchData();
+    };
     return (
         <div>
             <Navbar />
@@ -90,14 +95,20 @@ const ManageBookings = () => {
                     <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
-                    <Button onClick={() => handleSort("status")} variant="contained">
+                    <Button onClick={() => handleSort("status")} variant="contained" sx={{ marginRight: 2 }}>
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
+                    <Button variant="contained" color="primary" onClick={() => setOpenCreateDialog(true)}>Create Booking</Button>
                     <Box sx={{ mt: 3 }}>
                         <TableBookingAdmin rows={sortedRows} />
                     </Box>
                 </Paper>
             </Container>
+            <CreateBookingAdmin 
+                open={openCreateDialog}
+                onClose={()=>setOpenCreateDialog(false)}
+                onBookingCreated={handleBookingCreated}
+            />
             <Footer />
         </div>
     );
