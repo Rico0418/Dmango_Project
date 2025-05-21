@@ -5,6 +5,7 @@ import Footer from "../../components/organisms/Footer";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import TablePaymentAdmin from "../../components/organisms/TablePaymentAdmin";
+import { startOfDay } from "date-fns";
 const ManagePaymentDetail = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
@@ -55,7 +56,7 @@ const ManagePaymentDetail = () => {
                 {
                     label: "Accept",
                     color: "success",
-                    onClick: () => handleAccept(payment.id),
+                    onClick: () => handleAccept(payment),
                 },
                 {
                     label: "Delete",
@@ -82,10 +83,56 @@ const ManagePaymentDetail = () => {
             direction: prevSort.key === key && prevSort.direction === "asc" ? "desc" : "asc",
         }));
     }
-    const handleAccept = async (id) => {
+    const handleAccept = async (payment) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.patch(`http://localhost:8080/payments/${id}`,
+            const bookingResponse = await axios.get(
+                `http://localhost:8080/bookings/${payment.booking_id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const booking = bookingResponse.data;
+            if (!booking || booking.status.trim().toLowerCase() === "confirmed") {
+                toast.error(
+                    `Booking ID ${payment.booking_id} is invalid or already confirmed`
+                );
+                return;
+            }
+            const confirmedBookingsResponse = await axios.get(
+                `http://localhost:8080/bookings/room/${booking.room_id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const confirmedBookings = Array.isArray(confirmedBookingsResponse.data)
+                ? confirmedBookingsResponse.data.map((b) => ({
+                    id: b.id,
+                    start_date: new Date(b.start_date),
+                    end_date: new Date(b.end_date),
+                }))
+                : [];
+            const normalizedStart = startOfDay(new Date(booking.start_date));
+            const normalizedEnd = startOfDay(new Date(booking.end_date));
+            const hasOverlap = confirmedBookings.some((b) => {
+                const normalizedBookedStart = startOfDay(b.start_date);
+                const normalizedBookedEnd = startOfDay(b.end_date);
+                return (
+                    normalizedStart <= normalizedBookedEnd &&
+                    normalizedEnd >= normalizedBookedStart
+                );
+            });
+            if (hasOverlap) {
+                toast.error(
+                    `Cannot accept payment ID ${payment.id}: Booking overlaps with a confirmed booking`
+                );
+                return;
+            }
+            await axios.patch(`http://localhost:8080/payments/${payment.id}`,
                 { status: "accepted" },
                 {
                     headers: {
@@ -96,7 +143,7 @@ const ManagePaymentDetail = () => {
             toast.success("Payment accepted");
             setRows((prev) =>
                 prev.map((row) =>
-                    row.id === id
+                    row.id === payment.id
                         ? { ...row, status: "accepted", actions: getDynamicActions({ ...row, status: "accepted" }) }
                         : row
                 )
@@ -106,11 +153,12 @@ const ManagePaymentDetail = () => {
             toast.error("Failed to accept payment");
         }
     };
+
     const handleCancel = async (id) => {
         try {
             const token = localStorage.getItem("token");
             await axios.patch(`http://localhost:8080/payments/${id}`,
-                { status: "canceled"},
+                { status: "canceled" },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -120,9 +168,9 @@ const ManagePaymentDetail = () => {
             toast.info("Payment canceled");
             setRows((prev) =>
                 prev.map((row) =>
-                  row.id === id
-                    ? { ...row, status: "canceled", actions: getDynamicActions({ ...row, status: "canceled" }) }
-                    : row
+                    row.id === id
+                        ? { ...row, status: "canceled", actions: getDynamicActions({ ...row, status: "canceled" }) }
+                        : row
                 )
             );
         } catch (error) {
