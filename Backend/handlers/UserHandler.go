@@ -73,6 +73,24 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
+func (h *UserHandler) GetAllUser (c *gin.Context){
+	rows, err := h.DB.Query(context.TODO(), `SELECT * FROM users WHERE NOT name = 'Admin'`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		return
+	}
+	defer rows.Close()
+	var users []models.User
+	for rows.Next(){
+		var u models.User
+		if err := rows.Scan(&u.ID,&u.Name,&u.Email,&u.Password,&u.Role, &u.CreatedAt); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		users = append(users, u)
+	}
+	c.JSON(http.StatusOK, users)
+}
 func (h *UserHandler) GetDetailUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User

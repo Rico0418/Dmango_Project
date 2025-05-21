@@ -116,8 +116,10 @@ func (h *RoomHandler) MarkRoomAsBookedToday(c *gin.Context){
 		WHERE id IN (
 			SELECT room_id
 			FROM bookings
-			WHERE start_date = CURRENT_DATE AND status = 'confirmed'
-		)
+			WHERE status = 'confirmed'
+			AND CURRENT_DATE >= start_date::date
+			AND CURRENT_DATE <= end_date::date
+		) AND status != 'booked'
 	`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

@@ -8,6 +8,7 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password,omitempty"`
 	Role     string `json:"role"` // "customer" or "admin"
+	CreatedAt   time.Time `json:"created_at"`
 }
 type GuestHouse struct {
 	ID       int    `json:"id"`
