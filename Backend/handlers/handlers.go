@@ -199,7 +199,7 @@ func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 	// Handle different payment statuses
 	switch req.Status {
 	case "accepted":
-		// Payment accepted → Confirm booking, mark room as booked
+
 		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'confirmed' WHERE id = $1", bookingID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -207,7 +207,7 @@ func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 		}
 
 	case "canceled":
-		// Payment canceled → Cancel booking, keep room available
+
 		_, err = tx.Exec(context.Background(), "UPDATE bookings SET status = 'canceled' WHERE id = $1", bookingID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
