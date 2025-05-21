@@ -38,7 +38,10 @@ const ComplaintRoom = () => {
                 const res = await axios.get(`http://localhost:8080/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                setPayments(Array.isArray(res.data) ? res.data : []);
+                const acceptedPayments = Array.isArray(res.data)
+                ? res.data.filter((payment) => payment.status.trim().toLowerCase() === "accepted")
+                : [];
+                setPayments(acceptedPayments);
             } catch (err) {
                 setError("Failed to fetch booking history");
             }
