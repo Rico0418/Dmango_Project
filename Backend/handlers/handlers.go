@@ -52,7 +52,7 @@ func (h *Handler) GetPaymentDetailbyUserID(c *gin.Context) {
 	userID := c.Param("user_id")
 	query := `
 		SELECT p.id, p.booking_id, p.amount, p.method, p.status, p.created_at,
-		b.id, b.user_id, u.email, b.room_id, rm.room_number, b.start_date, b.end_date, b.status
+		b.id, b.user_id, u.name ,u.email, b.room_id, rm.room_number, b.start_date, b.end_date, b.status
 		FROM payments p
 		INNER JOIN bookings b ON p.booking_id = b.id
 		INNER JOIN rooms rm ON b.room_id = rm.id
@@ -75,7 +75,7 @@ func (h *Handler) GetPaymentDetailbyUserID(c *gin.Context) {
 
 		err := rows.Scan(
 			&payment.ID, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
-			&booking.ID, &booking.UserID, &booking.UserEmail, &booking.RoomID, &booking.RoomNumber,
+			&booking.ID, &booking.UserID, &booking.UserName, &booking.UserEmail, &booking.RoomID, &booking.RoomNumber,
 			&booking.StartDate, &booking.EndDate, &booking.Status,
 		)
 

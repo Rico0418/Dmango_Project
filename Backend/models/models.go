@@ -38,6 +38,7 @@ type Complaint struct {
 type Booking struct {
 	ID         int       `json:"id"`
 	UserID     int       `json:"user_id"`
+	UserName   string 	 `json:"name"`
 	UserEmail  string    `json:"email"`
 	RoomID     int       `json:"room_id"`
 	RoomNumber string    `json:"room_number"`
