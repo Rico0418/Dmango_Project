@@ -3,7 +3,7 @@ import Footer from "../../components/organisms/Footer";
 import Navbar from "../../components/organisms/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { Card, CardContent, Typography, Alert } from "@mui/material";
+import { Card, CardContent, Typography, Alert, Box, Button } from "@mui/material";
 
 const GetHistoryBooking = () => {
     const { user } = useAuth();
@@ -23,6 +23,19 @@ const GetHistoryBooking = () => {
         };
         fetchPayments();
     }, [user.id]);
+    const handleWhatsAppRedirect = (payment) => {
+        const PhoneNumber = 12345678;
+        const message = `Order D'mango Detail:
+        Booking ID: ${payment.booking.id}
+        Name: ${payment.booking.name}
+        Email: ${payment.booking.email}
+        Room Number: ${payment.booking.room_number.trim()}
+        Start-date: ${new Date(payment.booking.start_date).toLocaleDateString()}
+        End-date: ${new Date(payment.booking.end_date).toLocaleDateString()} 
+Berikut pesanan saya yang saya sudah buat di web
+        `.trim();
+        window.open(`http://wa.me/${PhoneNumber}?text=` + encodeURIComponent(message));
+    };
     return (
         <div>
             <Navbar />
@@ -61,9 +74,20 @@ const GetHistoryBooking = () => {
                                 </Typography>
 
                                 {payment.status.trim().toLowerCase() === "pending" && (
-                                    <Alert severity="warning" sx={{ mt: 2 }}>
-                                        Please contact the owner to complete your transaction.
-                                    </Alert>
+                                    <Box>
+                                        <Alert severity="warning" sx={{ mb: 2 }}>
+                                            Please contact the owner to complete your transaction.
+                                        </Alert>
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            size="small"
+                                            onClick={() => handleWhatsAppRedirect(payment)}
+                                            sx={{ textTransform: "none" }}
+                                        >
+                                            Contact via WhatsApp
+                                        </Button>
+                                    </Box>
                                 )}
                             </CardContent>
                         </Card>
