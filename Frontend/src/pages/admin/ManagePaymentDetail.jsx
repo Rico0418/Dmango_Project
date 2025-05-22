@@ -25,6 +25,7 @@ const ManagePaymentDetail = () => {
                     method: payment.method,
                     created_at: payment.created_at.substring(0, 10),
                     status: payment.status,
+                    endDate: new Date(payment.booking.end_date),
                     actions: getDynamicActions(payment),
                 }));
                 setRows(formattedRows);
@@ -38,32 +39,48 @@ const ManagePaymentDetail = () => {
     const getDynamicActions = (payment) => {
         let actions = [];
         const status = payment.status.trim().toLowerCase();
-        if (status === "accepted") {
-            actions.push(
-                {
-                    label: "Cancel",
-                    color: "warning",
-                    onClick: () => handleCancel(payment.id),
-                },
-                {
-                    label: "Delete",
-                    color: "error",
-                    onClick: () => handleDelete(payment.id),
-                }
-            );
-        } else if (status === "pending" || status === "canceled") {
-            actions.push(
-                {
-                    label: "Accept",
-                    color: "success",
-                    onClick: () => handleAccept(payment),
-                },
-                {
-                    label: "Delete",
-                    color: "error",
-                    onClick: () => handleDelete(payment.id),
-                }
-            );
+        const today = startOfDay(new Date());
+        const endDate = startOfDay(new Date(payment.booking.end_date));
+        const isEndDatePast = endDate < today;
+        if (isEndDatePast) {
+            actions.push({
+                label: "Expired",
+                color: "default",
+                disabled: true,
+                onClick: () => toast.info("Cannot modify payment: Booking end date has passed"),
+            }, {
+                label: "Delete",
+                color: "error",
+                onClick: () => handleDelete(payment.id),
+            })
+        } else {
+            if (status === "accepted") {
+                actions.push(
+                    {
+                        label: "Cancel",
+                        color: "warning",
+                        onClick: () => handleCancel(payment.id),
+                    },
+                    {
+                        label: "Delete",
+                        color: "error",
+                        onClick: () => handleDelete(payment.id),
+                    }
+                );
+            } else if (status === "pending" || status === "canceled") {
+                actions.push(
+                    {
+                        label: "Accept",
+                        color: "success",
+                        onClick: () => handleAccept(payment),
+                    },
+                    {
+                        label: "Delete",
+                        color: "error",
+                        onClick: () => handleDelete(payment.id),
+                    }
+                );
+            }
         }
 
         return actions;
