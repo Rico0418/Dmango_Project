@@ -24,7 +24,7 @@ const GetDetailRoom = () => {
         const fetchRoomDetail = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(`http://localhost:8080/rooms/${id}`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

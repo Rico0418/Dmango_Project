@@ -30,7 +30,7 @@ const BookingPopup = ({ open, onClose, room }) => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://localhost:8080/bookings/room/${room.id}`,
+          `${import.meta.env.VITE_API_URL}/bookings/room/${room.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -134,7 +134,7 @@ const BookingPopup = ({ open, onClose, room }) => {
         return;
       }
       const bookingResponse = await axios.post(
-        "http://localhost:8080/bookings",
+        `${import.meta.env.VITE_API_URL}/bookings`,
         {
           room_id: room.id,
           user_id: user.id,
@@ -146,7 +146,7 @@ const BookingPopup = ({ open, onClose, room }) => {
         }
       );
       await axios.post(
-        "http://localhost:8080/payments",
+        `${import.meta.env.VITE_API_URL}/payments`,
         {
           booking_id: bookingResponse.data.booking_id,
           amount: calculateAmount(),

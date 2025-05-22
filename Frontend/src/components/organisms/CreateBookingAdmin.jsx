@@ -35,10 +35,10 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
             try {
                 const token = localStorage.getItem("token");
                 const [roomsResponse, userResponse] = await Promise.all([
-                    axios.get("http://localhost:8080/rooms", {
+                    axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
-                    axios.get("http://localhost:8080/users", {
+                    axios.get(`${import.meta.env.VITE_API_URL}/users`, {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
                 ]);
@@ -57,7 +57,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
         const fetchBookedDates = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(`http://localhost:8080/bookings/room/${roomId}`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/room/${roomId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const ranges = Array.isArray(response.data)
@@ -171,7 +171,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
                 return;
             }
             const bookingResponse = await axios.post(
-                "http://localhost:8080/bookings",
+                `${import.meta.env.VITE_API_URL}/bookings`,
                 {
                     room_id: parseInt(roomId),
                     user_id: parseInt(userId),
@@ -183,7 +183,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
                 }
             );
             await axios.post(
-                "http://localhost:8080/payments",
+                `${import.meta.env.VITE_API_URL}/payments`,
                 {
                     booking_id: bookingResponse.data.booking_id,
                     amount: calculateAmount(),

@@ -13,7 +13,7 @@ const ManageBookings = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.get("http://localhost:8080/bookings", {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -64,7 +64,7 @@ const ManageBookings = () => {
     const handleDelete = async (id) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:8080/bookings/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/bookings/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",

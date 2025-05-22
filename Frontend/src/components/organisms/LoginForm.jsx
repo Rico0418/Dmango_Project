@@ -18,7 +18,7 @@ const LoginForm = () => {
             return;
         }
         try {
-            const response = await axios.post("http://localhost:8080/login", { name, email, password });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { name, email, password });
             const token = response.data.token;
             if (token) {
                 login(token);

@@ -14,7 +14,7 @@ const UserProfile = () => {
         const fetchUser = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(`http://localhost:8080/users/detail/${id}`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/detail/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(response.data);
@@ -34,7 +34,7 @@ const UserProfile = () => {
         try {
             const token = localStorage.getItem("token");
             await axios.put(
-                "http://localhost:8080/users/password",
+                `${import.meta.env.VITE_API_URL}/users/password`,
                 { old_password: oldPassword, new_password: newPassword },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

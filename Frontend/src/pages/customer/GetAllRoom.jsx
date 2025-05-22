@@ -15,7 +15,7 @@ const GetAllRoom = () => {
             try {
                 const token = localStorage.getItem("token");
                 console.log(token);
-                const response = await axios.get("http://localhost:8080/rooms", {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

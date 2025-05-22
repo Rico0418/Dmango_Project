@@ -24,7 +24,7 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
                 description,
             };
             const token = localStorage.getItem("token")
-            const res = await axios.post("http://localhost:8080/complaints", payload,{headers: {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/complaints`, payload,{headers: {
                 Authorization: `Bearer ${token}`
             }});
             toast.success("Complaint created successfully");

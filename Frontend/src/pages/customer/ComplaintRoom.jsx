@@ -21,7 +21,7 @@ const ComplaintRoom = () => {
     const fetchComplaints = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get(`http://localhost:8080/complaints/user/${user.id}`, {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/complaints/user/${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setComplaints(Array.isArray(res.data) ? res.data : []);
@@ -35,7 +35,7 @@ const ComplaintRoom = () => {
         const fetchPayments = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await axios.get(`http://localhost:8080/payments/user/${user.id}`, {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const acceptedPayments = Array.isArray(res.data)
@@ -55,7 +55,7 @@ const ComplaintRoom = () => {
     const handleDeleteComplaint = async (id) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:8080/complaints/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/complaints/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -71,7 +71,7 @@ const ComplaintRoom = () => {
     const handleUpdateComplaint = async (id, description) => {
         try {
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:8080/complaints/description/${id}`,
+            await axios.put(`${import.meta.env.VITE_API_URL}/complaints/description/${id}`,
                 { description },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

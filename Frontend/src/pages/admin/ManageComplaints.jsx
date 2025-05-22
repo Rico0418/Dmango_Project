@@ -13,7 +13,7 @@ const ManageComplaints = () => {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/complaints", {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/complaints`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -64,7 +64,7 @@ const ManageComplaints = () => {
         try{
             const token = localStorage.getItem("token");
             const response = await axios.put(
-                `http://localhost:8080/complaints/status/${complaint.id}`,
+                `${import.meta.env.VITE_API_URL}/complaints/status/${complaint.id}`,
                 { status: "Resolved" },
                 {
                     headers: {
@@ -86,7 +86,7 @@ const ManageComplaints = () => {
     const handleDelete = async(id) =>{
         try{
             const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:8080/complaints/${id}`, {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/complaints/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",

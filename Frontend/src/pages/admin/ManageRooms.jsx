@@ -18,17 +18,17 @@ const ManageRooms = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem("token");
-            await axios.put("http://localhost:8080/rooms/update-status", {}, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-status`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            await axios.put("http://localhost:8080/rooms/update-booked", {}, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-booked`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            const response = await axios.get("http://localhost:8080/rooms", {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -122,7 +122,7 @@ const ManageRooms = () => {
                     <Button variant="contained" onClick={async () => {
                         try {
                             const token = localStorage.getItem("token");
-                            await axios.put(`http://localhost:8080/rooms/update-price`, {
+                            await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "daily",
                                 price: parseFloat(priceForm),
                             }, {
@@ -158,7 +158,7 @@ const ManageRooms = () => {
                     <Button variant="contained" onClick={async () => {
                         try {
                             const token = localStorage.getItem("token");
-                            await axios.put(`http://localhost:8080/rooms/update-price`, {
+                            await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "monthly",
                                 price: parseFloat(priceFormMonthly),
                             }, {

@@ -15,7 +15,7 @@ const UpdateRoomForm = () => {
         const fetchRoomData = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get(`http://localhost:8080/rooms/${id}`, {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const room = response.data;
@@ -37,7 +37,7 @@ const UpdateRoomForm = () => {
         }
         try {
             const token = localStorage.getItem("token");
-            const response = await axios.put(`http://localhost:8080/rooms/${id}`, {
+            const response = await axios.put(`${import.meta.env.VITE_API_URL}/rooms/${id}`, {
                 price_per_day: parseFloat(pricePerDay),
                 price_per_month: parseFloat(pricePerMonth),
             }, {

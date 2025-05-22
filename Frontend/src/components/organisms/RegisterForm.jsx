@@ -17,7 +17,7 @@ const RegisterForm = () => {
             return;
         }
         try {
-            const response = await axios.post("http://localhost:8080/register", { name,email, password });
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, { name,email, password });
             if (response.status == 201) {
                 toast.success("Register successfull");
                 navigate("/login");

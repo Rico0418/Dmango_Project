@@ -9,11 +9,12 @@ const GetHistoryBooking = () => {
     const { user } = useAuth();
     const [payments, setPayments] = useState([]);
     const [error, setError] = useState("");
+
     useEffect(() => {
         const fetchPayments = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await axios.get(`http://localhost:8080/payments/user/${user.id}`, {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setPayments(Array.isArray(res.data) ? res.data : []);
@@ -24,17 +25,19 @@ const GetHistoryBooking = () => {
         fetchPayments();
     }, [user.id]);
     const handleWhatsAppRedirect = (payment) => {
-        const PhoneNumber = 12345678;
+        const PhoneNumber = import.meta.env.VITE_OWNER_PHONE_NUMBER;
         const message = `Order D'mango Detail:
         Booking ID: ${payment.booking.id}
         Name: ${payment.booking.name}
         Email: ${payment.booking.email}
         Room Number: ${payment.booking.room_number.trim()}
         Start-date: ${new Date(payment.booking.start_date).toLocaleDateString()}
-        End-date: ${new Date(payment.booking.end_date).toLocaleDateString()} 
+        End-date: ${new Date(payment.booking.end_date).toLocaleDateString()}
+        Amount: Rp ${payment.amount.toLocaleString()} 
 Berikut pesanan saya yang saya sudah buat di web
         `.trim();
-        window.open(`http://wa.me/${PhoneNumber}?text=` + encodeURIComponent(message));
+        const url = `https://wa.me/${PhoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
     };
     return (
         <div>
@@ -65,7 +68,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                     {new Date(payment.booking.end_date).toLocaleDateString()}
                                 </Typography>
                                 <Typography variant="body1">
-                                    <strong>Amount:</strong> Rp{payment.amount.toLocaleString()}
+                                    <strong>Amount:</strong> Rp {payment.amount.toLocaleString()}
                                 </Typography>
                                 <Typography variant="body1">
                                     <strong>Status:</strong>{" "}
