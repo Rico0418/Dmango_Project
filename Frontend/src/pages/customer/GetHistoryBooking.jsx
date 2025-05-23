@@ -4,6 +4,8 @@ import Navbar from "../../components/organisms/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { Card, CardContent, Typography, Alert, Box, Button } from "@mui/material";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const GetHistoryBooking = () => {
     const { user } = useAuth();
@@ -39,6 +41,28 @@ Berikut pesanan saya yang saya sudah buat di web
         const url = `https://wa.me/${PhoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
+    const handleDownloadInvoice = (payment) => {
+        const data = [
+            {
+                "Booking ID": payment.booking.id,
+                "Name": payment.booking.name,
+                "Email": payment.booking.email,
+                "Room Number": payment.booking.room_number.trim(),
+                "Start-date": new Date(payment.booking.start_date).toLocaleDateString(),
+                "End-date": new Date(payment.booking.end_date).toLocaleDateString(),
+                "Amount (Rp)": payment.amount,
+                "Status": payment.status.trim(),
+            }
+        ];
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Invoice");
+
+        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        const fileName = `Invoice_Booking_${payment.booking.name}.xlsx`;
+        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(blob, fileName);
+    }
     return (
         <div>
             <Navbar />
@@ -89,6 +113,19 @@ Berikut pesanan saya yang saya sudah buat di web
                                             sx={{ textTransform: "none" }}
                                         >
                                             Contact via WhatsApp
+                                        </Button>
+                                    </Box>
+                                )}
+                                {payment.status.trim().toLowerCase() === "accepted" && (
+                                    <Box>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="small"
+                                            onClick={() => handleDownloadInvoice(payment)}
+                                            sx={{ textTransform: "none" }}
+                                        >
+                                            Download Invoice 
                                         </Button>
                                     </Box>
                                 )}
