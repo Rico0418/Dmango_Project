@@ -88,18 +88,27 @@ const ManageRooms = () => {
                     >
                         Room List
                     </Typography>
-                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
-                        Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
-                    </Button>
-                    <Button onClick={() => handleSort("status")} variant="contained"  sx={{ marginRight: 2 }}>
-                        Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
-                    </Button>
-                    <Button onClick={() => setOpenPriceDialogDaily(true)} variant="contained"  sx={{ marginRight: 2 }}>
-                        Change Daily Room Price
-                    </Button>
-                    <Button onClick={() => setOpenPriceDialogMonthly(true)} variant="contained">
-                        Change Monthly Room Price
-                    </Button>
+                    <Box sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 2,
+                        justifyContent: { xs: "center" },
+                        mb: 2,
+                    }}>
+                        <Button onClick={() => handleSort("id")} variant="contained">
+                            Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                        </Button>
+                        <Button onClick={() => handleSort("status")} variant="contained">
+                            Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                        </Button>
+                        <Button onClick={() => setOpenPriceDialogDaily(true)} variant="contained">
+                            Change Daily Room Price
+                        </Button>
+                        <Button onClick={() => setOpenPriceDialogMonthly(true)} variant="contained">
+                            Change Monthly Room Price
+                        </Button>
+                    </Box>
+
                     <Box sx={{ mt: 3 }}>
                         <TableRoomAdmin rows={sortedRows} />
                     </Box>
@@ -141,7 +150,7 @@ const ManageRooms = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-             <Dialog open={openPriceDialogMonthly} onClose={() => setOpenPriceDialogMonthly(false)}>
+            <Dialog open={openPriceDialogMonthly} onClose={() => setOpenPriceDialogMonthly(false)}>
                 <DialogTitle>Change Monthly Room Price</DialogTitle>
                 <DialogContent>
                     <TextField
