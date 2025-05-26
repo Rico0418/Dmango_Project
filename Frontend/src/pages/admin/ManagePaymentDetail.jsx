@@ -47,7 +47,6 @@ const ManagePaymentDetail = () => {
 
         const today = startOfDay(new Date());
 
-        // Handle missing booking
         if (!payment.booking || !payment.booking.end_date) {
             actions.push({
                 label: "Invalid Booking",

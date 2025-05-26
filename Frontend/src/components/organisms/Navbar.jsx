@@ -44,7 +44,13 @@ const Navbar = () => {
         <Tabs
             value={location.pathname}
             textColor="inherit"
-            sx={{ "& .MuiTabs-indicator": { backgroundColor: "white" } }}
+            sx={{
+                "& .MuiTab-root": {
+                    fontWeight: 500,
+                    fontSize: "15px",
+                    textTransform: "none"
+                }
+            }}
         >
             {navItems.map(item => (
                 <Tab
@@ -59,8 +65,13 @@ const Navbar = () => {
     );
 
     const renderMobileMenu = () => (
-        <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)} sx={{  outline: "none" }}>
-            <Box sx={{ width: 250 }} role="presentation" onClick={() => setDrawerOpen(false)}>
+        <Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)} sx={{ outline: "none" }}>
+            <Box sx={{
+                width: 250,
+                p: 2,
+                backgroundColor: theme.palette.background.paper,
+                height: "100%"
+            }} role="presentation" onClick={() => setDrawerOpen(false)}>
                 <List>
                     {navItems.map(item => (
                         <ListItem button key={item.path} onClick={() => navigate(item.path)}>
@@ -79,39 +90,64 @@ const Navbar = () => {
     );
 
     return (
-        <AppBar position="static" sx={{ width: "100%", top: 0 }}>
+        <AppBar
+            position="sticky"
+            elevation={4}
+            sx={{
+                background: "#27548A",
+                px: 2,
+                py: 1,
+                borderRadius: "0 0 0px 0px",
+            }}
+        >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-                <TypographyTemplate
-                    variant="h5"
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => navigate("/")}
-                >
-                    Dmango Residence
-                </TypographyTemplate>
+                <Box display="flex" alignItems="center">
+                    <TypographyTemplate
+                        variant="h6"
+                        sx={{ cursor: "pointer", fontWeight: "bold", color: "#fff" }}
+                        onClick={() => navigate("/")}
+                    >
+                        Dmango Residence
+                    </TypographyTemplate>
+                </Box>
 
                 {isMobile ? (
                     <>
-                        <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
+                        <IconButton color="inherit" onClick={() => setDrawerOpen(true)} sx={{
+                            "&:focus": { outline: "none" },
+                            "&:focus-visible": { outline: "none" },
+                            "&:active": { outline: "none" }
+                        }}>
                             <MenuIcon />
                         </IconButton>
                         {renderMobileMenu()}
                     </>
                 ) : (
-                    <>
-                        <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
-                            {renderTabs()}
-                        </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        {renderTabs()}
                         {user && (
                             <>
-                                <IconButton sx={{ color: "inherit", mr: 1 }} onClick={() => navigate(`/user/profile/${user.id}`)}>
-                                    <AccountCircle sx={{ fontSize: 40 }} />
+                                <IconButton color="inherit" onClick={() => navigate(`/user/profile/${user.id}`)} sx={{
+                                    "&:focus": { outline: "none" },
+                                    "&:focus-visible": { outline: "none" },
+                                    "&:active": { outline: "none" }
+                                }}>
+                                    <AccountCircle sx={{ fontSize: 32 }} />
                                 </IconButton>
-                                <Button variant="contained" color="error" onClick={handleLogout}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    size="small"
+                                    onClick={handleLogout}
+                                    sx={{ borderRadius: 2, textTransform: "none", fontWeight: "bold", "&:focus": { outline: "none" },
+                                    "&:focus-visible": { outline: "none" },
+                                    "&:active": { outline: "none" } }}
+                                >
                                     Logout
                                 </Button>
                             </>
                         )}
-                    </>
+                    </Box>
                 )}
             </Toolbar>
         </AppBar>
