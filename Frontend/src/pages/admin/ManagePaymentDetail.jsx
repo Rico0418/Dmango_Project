@@ -9,50 +9,72 @@ import { startOfDay } from "date-fns";
 const ManagePaymentDetail = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/payments`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const formattedRows = response.data.map((payment) => ({
+    const fetchData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/payments`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const formattedRows = response.data.map((payment) => {
+                const booking = payment.booking;
+                const endDate = booking ? new Date(booking.end_date) : null;
+                return {
                     id: payment.id,
                     booking_id: payment.booking_id,
                     amount: payment.amount,
                     method: payment.method,
                     created_at: payment.created_at.substring(0, 10),
                     status: payment.status,
-                    endDate: new Date(payment.booking.end_date),
+                    endDate,
                     actions: getDynamicActions(payment),
-                }));
-                setRows(formattedRows);
-                console.log("Formatted Rows: ", formattedRows);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+                };
+            });
+
+            setRows(formattedRows);
+            console.log("Formatted Rows: ", formattedRows);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    useEffect(() => {
         fetchData();
     }, []);
     const getDynamicActions = (payment) => {
         let actions = [];
         const status = payment.status.trim().toLowerCase();
+
         const today = startOfDay(new Date());
-        const endDate = startOfDay(new Date(payment.booking.end_date));
-        const isEndDatePast = endDate < today;
-        if (isEndDatePast) {
+
+        // Handle missing booking
+        if (!payment.booking || !payment.booking.end_date) {
             actions.push({
-                label: "Expired",
+                label: "Invalid Booking",
                 color: "default",
                 disabled: true,
-                onClick: () => toast.info("Cannot modify payment: Booking end date has passed"),
-            }, {
-                label: "Delete",
-                color: "error",
-                onClick: () => handleDelete(payment.id),
-            })
+                onClick: () => toast.warning("No booking data available for this payment."),
+            });
+            return actions;
+        }
+
+        const endDate = startOfDay(new Date(payment.booking.end_date));
+        const isEndDatePast = endDate < today;
+
+        if (isEndDatePast) {
+            actions.push(
+                {
+                    label: "Expired",
+                    color: "default",
+                    disabled: true,
+                    onClick: () => toast.info("Cannot modify payment: Booking end date has passed"),
+                },
+                {
+                    label: "Delete",
+                    color: "error",
+                    onClick: () => handleDelete(payment.id),
+                }
+            );
         } else {
             if (status === "accepted") {
                 actions.push(
@@ -85,6 +107,7 @@ const ManagePaymentDetail = () => {
 
         return actions;
     };
+
     const sortedRows = [...rows].sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
             return sortConfig.direction === "asc" ? -1 : 1;
@@ -165,6 +188,7 @@ const ManagePaymentDetail = () => {
                         : row
                 )
             );
+            fetchData();
         } catch (error) {
             console.error(error);
             toast.error("Failed to accept payment");
@@ -190,6 +214,7 @@ const ManagePaymentDetail = () => {
                         : row
                 )
             );
+            fetchData();
         } catch (error) {
             console.error(error);
             toast.error("Failed to cancel payment");

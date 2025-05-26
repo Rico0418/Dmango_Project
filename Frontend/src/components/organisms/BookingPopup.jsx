@@ -129,6 +129,16 @@ const BookingPopup = ({ open, onClose, room }) => {
         toast.error("Start date must be before end date");
         return;
       }
+      if(room.type.trim() === "monthly"){
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const monthDiff = (end.getFullYear() - start.getFullYear())*12
+                          + (end.getMonth() - start.getMonth());
+        if (monthDiff < 1) {
+          toast.error("Minimum booking for monthly rooms is 1 month");
+          return;
+        }
+      }
       if (hasDateRangeOverlap(startDate,endDate)){
         toast.error("Selected date range overlaps with an existing booking");
         return;
