@@ -41,15 +41,36 @@ const RegisterForm = () => {
                 <InputLabel name="name" type="name" onChange={(e) => setName(e.target.value)} label="Name" value={name} />
                 <InputLabel name="email" type="email" onChange={(e) => setEmail(e.target.value)} label="Email" value={email} />
                 <InputLabel name="password" type="password" onChange={(e) => setPassword(e.target.value)} label="Password" value={password} />
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="primary" sx={{
+                    borderRadius: 2,
+                    textTransform: "none",
+                    fontWeight: "bold",
+                    py: 1.5,
+                    fontSize: "1rem",
+                    "&:hover": {
+                        backgroundColor: "#3b82f6",
+                    },
+                    "&:focus": { outline: "none" },
+                    "&:focus-visible": { outline: "none" },
+                    "&:active": { outline: "none" }
+                }}>
                     Register
                 </Button>
             </Box>
             <Link
                 component="button"
-                variant="body1"
+                variant="body2"
                 onClick={() => {
                     navigate("/login");
+                }}
+                sx={{
+                    mt: 1,
+                    textAlign: "center",
+                    textDecoration: "none",
+                    color: "primary.main",
+                    "&:hover": {
+                        textDecoration: "underline",
+                    },
                 }}
             >
                 Already have account? Login Here
