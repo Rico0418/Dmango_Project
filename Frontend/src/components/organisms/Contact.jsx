@@ -4,7 +4,7 @@ import TypographyTemplate from "../molecules/Typography";
 
 const Contact = () => {
     return (
-        <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+        <Container maxWidth="md" sx={{ mt: 4, mb: 4}}>
             <Card sx={{ borderRadius: 3, boxShadow: 5, backgroundColor: "#f9f9f9" }}>
                 <CardContent>
                     <Typography variant="h4" fontWeight="bold" align="center" color="primary" gutterBottom>
@@ -14,7 +14,7 @@ const Contact = () => {
                     <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                         <LocationOn color="secondary" sx={{ mr: 1 }} />
                         <Typography variant="body1">
-                            <strong>Location:</strong> Semarang, Indonesia
+                            <strong>Location:</strong> Jl. Taman Maluku No.48, Karangtempel, Kec. Semarang Tim., Kota Semarang, Jawa Tengah 50125
                         </Typography>
                     </Box>
 

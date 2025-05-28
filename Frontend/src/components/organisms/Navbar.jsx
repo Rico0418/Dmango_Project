@@ -107,7 +107,7 @@ const Navbar = () => {
                         sx={{ cursor: "pointer", fontWeight: "bold", color: "#fff" }}
                         onClick={() => navigate("/")}
                     >
-                        Dmango Residence
+                        D'mango Residence
                     </TypographyTemplate>
                 </Box>
 

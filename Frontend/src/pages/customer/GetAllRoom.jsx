@@ -32,13 +32,14 @@ const GetAllRoom = () => {
     const firstFloorRooms = rooms.filter(room => room.room_number.trim().startsWith("10"));
     const secondFloorRooms = rooms.filter(room => room.room_number.trim().startsWith("20"));
     const renderRooms = (rooms) => (
-        <Box display="flex" justifyContent="center" gap={2} mt={2}>
+        <Box display="flex" justifyContent="center" flexWrap="wrap" gap={2} mt={2}>
             {rooms.map((room) => (
                 <Paper key={room.id}
                     elevation={3}
                     onClick={() => navigate(`/customer/rooms/${room.id}`)}
                     sx={{
-                        width: 100,
+                        width: {xs: "22%", sm: 100},
+                        minWidth: 80,
                         height: 100,
                         display: "flex",
                         alignItems: "center",
