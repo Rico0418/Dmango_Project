@@ -1,9 +1,13 @@
 package main
-import(
+
+import (
 	"dmangoapp/config"
 	"dmangoapp/handlers"
 	"dmangoapp/middleware"
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron"
 )
 func main(){
 	config.ConnectDB()
@@ -15,6 +19,24 @@ func main(){
 	Bh := &handlers.BookingHandler{DB: config.DB}
 	Gh := &handlers.GuestHouseHandler{DB: config.DB}
 	r := gin.Default()
+
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if(err != nil) {
+		panic(err)
+	}
+
+	cronJob := cron.NewWithLocation(loc)
+	cronJob.AddFunc("* * * * *", func(){
+		if err := Rh.UpdateRoomStatus(); err != nil {
+			println("Failed to update available rooms: ", err.Error())
+		}
+		if err := Rh.MarkRoomAsBookedToday(); err != nil {
+			println("Failed to mark booked rooms: ", err.Error())
+		}
+	})
+
+	cronJob.Start()
+	defer cronJob.Stop()
 	r.Use(func (c *gin.Context)  {
 		c.Writer.Header().Set("Access-Control-Allow-Origin","*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH")
@@ -44,8 +66,6 @@ func main(){
 		protected.GET("/rooms",Rh.GetAllRooms)
 		protected.GET("/rooms/:id",Rh.GetDetailRoom)
 		protected.PUT("/rooms/:id",Rh.UpdateRoomPrice)
-		protected.PUT("/rooms/update-status", Rh.UpdateRoomStatus)
-		protected.PUT("/rooms/update-booked", Rh.MarkRoomAsBookedToday)
 		protected.PUT("/rooms/update-price", Rh.UpdateRoomPriceByType)
 
 		protected.GET("/users/detail/:id",Uh.GetDetailUser)

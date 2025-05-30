@@ -86,9 +86,9 @@ func (h *RoomHandler) UpdateRoomPrice(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Room updated successfully"})
 }
 
-func (h *RoomHandler) UpdateRoomStatus( c *gin.Context){
+func (h *RoomHandler) UpdateRoomStatus() error{
 	fmt.Println(">> Entered UpdateRoomStatus handler")
-	result,err := h.DB.Exec(context.Background(),
+	_,err := h.DB.Exec(context.Background(),
          `UPDATE rooms
 		 SET status = 'available'
 		 WHERE id IN(
@@ -97,20 +97,11 @@ func (h *RoomHandler) UpdateRoomStatus( c *gin.Context){
 			GROUP BY room_id
     		HAVING MAX(end_date)::date < CURRENT_DATE
 		) AND status != 'available'`)
-	if err != nil {
-		fmt.Println("SQL Error:", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if result.RowsAffected() == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "No rooms status updated"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Room status updated successfully"})	
+	return err
 }
 
-func (h *RoomHandler) MarkRoomAsBookedToday(c *gin.Context){
-	result, err := h.DB.Exec(context.Background(),`
+func (h *RoomHandler) MarkRoomAsBookedToday() error {
+	_, err := h.DB.Exec(context.Background(),`
 		UPDATE rooms
 		SET status = 'booked'
 		WHERE id IN (
@@ -121,15 +112,7 @@ func (h *RoomHandler) MarkRoomAsBookedToday(c *gin.Context){
 			AND CURRENT_DATE <= end_date::date
 		) AND status != 'booked'
 	`)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	if result.RowsAffected() == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "No rooms status updated"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Rooms booked for today's check-ins"})
+	return err
 }
 
 func (h * RoomHandler) UpdateRoomPriceByType(c *gin.Context) {
