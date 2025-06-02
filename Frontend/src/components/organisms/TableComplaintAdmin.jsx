@@ -1,6 +1,7 @@
 import TableComponent from "../molecules/TableComponent";
 const columns = [
     { field: "id", label: "ID"},
+    { field: "guest_house_name", label: "Guest House"},
     { field: "room_number", label: "Room Number"},
     { field: "email", label: "User Email"},
     { field: "description", label: "Description"},
@@ -9,7 +10,7 @@ const columns = [
 ]
 const TableComplaintAdmin = ({rows}) => {
     return (
-        <div>
+        <div style={{ width: "100%", overflowX: "auto" }}>
             <TableComponent columns={columns} rows={rows}/>
         </div>
     );

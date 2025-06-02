@@ -20,6 +20,7 @@ const ManageComplaints = () => {
                 });
                 const formattedRows = response.data.map((complaint) => ({
                     id: complaint.id,
+                    guest_house_name: complaint.guest_house_name.trim(),
                     room_number: complaint.room_number,
                     email: complaint.email,
                     description: complaint.description,

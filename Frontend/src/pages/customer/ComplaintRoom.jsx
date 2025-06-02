@@ -49,6 +49,7 @@ const ComplaintRoom = () => {
         fetchPayments();
         fetchComplaints();
     }, [user.id]);
+    console.log(complaints)
     const handleTabChange = (_, newValue) => {
         setTabIndex(newValue);
     };
@@ -160,6 +161,7 @@ const ComplaintRoom = () => {
                                         boxShadow: 3, border: "1px solid #e0e0e0",
                                     }}>
                                         <CardContent>
+                                            <Typography variant="h6">{complaint.guest_house_name}</Typography>
                                             <Typography variant="h6">Room #{complaint.room_number}</Typography>
                                             <Typography>Description: {complaint.description}</Typography>
                                             <Typography>
