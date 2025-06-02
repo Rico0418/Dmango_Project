@@ -1,4 +1,5 @@
 package handlers
+
 import (
 	"context"
 	"dmangoapp/internal/models"
@@ -6,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,7 +15,17 @@ type RoomHandler struct {
 	DB *pgxpool.Pool
 }
 func (h *RoomHandler) GetAllRooms(c *gin.Context) {
-	rows, err := h.DB.Query(context.Background(), `SELECT * FROM rooms`)
+	guestHouseID := c.Query("guest_house_id")
+	query := "SELECT * FROM rooms"
+	var rows pgx.Rows
+	var err error
+
+	if guestHouseID != "" {
+		query += " WHERE guest_house_id = $1"
+		rows, err = h.DB.Query(context.Background(),query,guestHouseID)
+	}else{
+		rows, err = h.DB.Query(context.Background(), query)
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 		return

@@ -3,12 +3,12 @@ package models
 import "time"
 
 type User struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Role     string `json:"role"` // "customer" or "admin"
-	CreatedAt   time.Time `json:"created_at"`
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
+	Role      string    `json:"role"` // "customer" or "admin"
+	CreatedAt time.Time `json:"created_at"`
 }
 type GuestHouse struct {
 	ID       int    `json:"id"`
@@ -26,19 +26,20 @@ type Room struct {
 	Status        string   `json:"status"` // "available" or "booked"
 }
 type Complaint struct {
-	ID          int       `json:"id"`
-	RoomID      int       `json:"room_id"`
-	RoomNumber  string    `json:"room_number"`
-	UserID      int       `json:"user_id"`
-	UserEmail   string    `json:"email"`
-	Description string    `json:"description"`
-	Status      string    `json:"status"` // "pending", "resolved"
-	CreatedAt   time.Time `json:"created_at"`
+	ID             int       `json:"id"`
+	GuestHouseName string    `json:"guest_house_name"`
+	RoomID         int       `json:"room_id"`
+	RoomNumber     string    `json:"room_number"`
+	UserID         int       `json:"user_id"`
+	UserEmail      string    `json:"email"`
+	Description    string    `json:"description"`
+	Status         string    `json:"status"` // "pending", "resolved"
+	CreatedAt      time.Time `json:"created_at"`
 }
 type Booking struct {
 	ID         int       `json:"id"`
 	UserID     int       `json:"user_id"`
-	UserName   string 	 `json:"name"`
+	UserName   string    `json:"name"`
 	UserEmail  string    `json:"email"`
 	RoomID     int       `json:"room_id"`
 	RoomNumber string    `json:"room_number"`

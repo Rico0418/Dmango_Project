@@ -15,10 +15,11 @@ type ComplaintsHandler struct {
 }
 func (h *ComplaintsHandler) GetAllComplaints(c *gin.Context) {
 	rows, err := h.DB.Query(context.Background(),
-		`SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		`SELECT c.id, gh.name, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
 		FROM complaints c
 		INNER JOIN rooms rm ON c.room_id = rm.id
-		INNER JOIN users u ON c.user_id = u.id`)
+		INNER JOIN users u ON c.user_id = u.id
+		INNER JOIN guest_house gh ON rm.guest_house_id = gh.id`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,gin.H{"error": err.Error()})
 		return
@@ -27,7 +28,7 @@ func (h *ComplaintsHandler) GetAllComplaints(c *gin.Context) {
 	var complaints []models.Complaint
 	for rows.Next(){
 		var complaint models.Complaint
-		if err := rows.Scan(&complaint.ID, &complaint.RoomID, &complaint.RoomNumber, 
+		if err := rows.Scan(&complaint.ID, &complaint.GuestHouseName,&complaint.RoomID, &complaint.RoomNumber, 
 			&complaint.UserID, &complaint.UserEmail, &complaint.Description, &complaint.Status, &complaint.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -40,10 +41,11 @@ func (h *ComplaintsHandler) GetComplaintByUserID(c *gin.Context) {
 	userID := c.Param("user_id")
 	
 	query := `
-		SELECT c.id, c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
+		SELECT c.id, gh.name ,c.room_id, rm.room_number, c.user_id, u.email, c.description, c.status, c.created_at
 		FROM complaints c
 		INNER JOIN rooms rm ON c.room_id = rm.id
 		INNER JOIN users u ON c.user_id = u.id
+		INNER JOIN guest_house gh ON rm.guest_house_id = gh.id
 		WHERE c.user_id = $1
 		ORDER BY c.created_at DESC
 	`
@@ -59,7 +61,7 @@ func (h *ComplaintsHandler) GetComplaintByUserID(c *gin.Context) {
 	for rows.Next() {
 		var complaint models.Complaint
 		err := rows.Scan(
-			&complaint.ID, &complaint.RoomID, &complaint.RoomNumber,
+			&complaint.ID, &complaint.GuestHouseName, &complaint.RoomID, &complaint.RoomNumber,
 			&complaint.UserID, &complaint.UserEmail, &complaint.Description,
 			&complaint.Status, &complaint.CreatedAt,
 		)
