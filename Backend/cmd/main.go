@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dmangoapp/config"
-	"dmangoapp/handlers"
-	"dmangoapp/middleware"
+	"dmangoapp/internal/config"
+	"dmangoapp/internal/handlers"
+	"dmangoapp/internal/middleware"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +26,7 @@ func main(){
 	}
 
 	cronJob := cron.NewWithLocation(loc)
-	cronJob.AddFunc("* * * * *", func(){
+	cronJob.AddFunc("0 */6 * * *", func(){
 		if err := Rh.UpdateRoomStatus(); err != nil {
 			println("Failed to update available rooms: ", err.Error())
 		}

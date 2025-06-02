@@ -1,7 +1,7 @@
 package handlers
 import (
 	"context"
-	"dmangoapp/models"
+	"dmangoapp/internal/models"
 	"fmt"
 	"net/http"
 

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dmangoapp/utils"
+	"dmangoapp/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
