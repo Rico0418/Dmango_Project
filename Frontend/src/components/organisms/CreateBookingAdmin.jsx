@@ -21,6 +21,8 @@ import { toast } from "react-toastify";
 import { startOfDay, isBefore, isEqual } from "date-fns";
 
 const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
+    const [guestHouses, setGuestHouses] = useState([]);
+    const [selectedGH, setSelectedGH] = useState("");
     const [rooms, setRooms] = useState([]);
     const [users, setUsers] = useState([]);
     const [roomId, setRoomId] = useState("");
@@ -31,26 +33,47 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
     const [bookedRanges, setBookedRanges] = useState([]);
 
     useEffect(() => {
-        const fetchRoomsAndUsers = async () => {
+        const fetchGuesthouseAndUsers = async () => {
             try {
                 const token = sessionStorage.getItem("token");
-                const [roomsResponse, userResponse] = await Promise.all([
-                    axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
+                const [guestHousesResponse, userResponse] = await Promise.all([
+                    axios.get(`${import.meta.env.VITE_API_URL}/guest_houses`, {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
                     axios.get(`${import.meta.env.VITE_API_URL}/users`, {
                         headers: { Authorization: `Bearer ${token}` },
                     }),
                 ]);
-                setRooms(Array.isArray(roomsResponse.data) ? roomsResponse.data : []);
+                setGuestHouses(Array.isArray(guestHousesResponse.data) ? guestHousesResponse.data : []);
                 setUsers(Array.isArray(userResponse.data) ? userResponse.data : []);
+                if(guestHousesResponse.data.length > 0) {
+                    setSelectedGH(guestHousesResponse.data[0].id);
+                }
             } catch (err) {
-                console.error("Failed to fetch rooms or user: ", err);
-                toast.error("Failed to load rooms or users");
+                console.error("Failed to fetch guest houses or user: ", err);
+                toast.error("Failed to load guest houses or users");
             }
         };
-        fetchRoomsAndUsers();
+        fetchGuesthouseAndUsers();
     }, []);
+
+    useEffect(() => {
+        if (!selectedGH) return;
+        const fetchRooms = async () => {
+            try {
+                const token = sessionStorage.getItem("token");
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms?guest_house_id=${selectedGH}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                setRooms(Array.isArray(response.data) ? response.data : []);
+            } catch (err) {
+                console.error("Failed to fetch rooms", err);
+                toast.error("Failed to load rooms");
+                setRooms([]);
+            }
+        };
+        fetchRooms();
+    }, [selectedGH]);
 
     useEffect(() => {
         if (!roomId) return;
@@ -157,7 +180,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
     const handleSubmit = async () => {
         try {
             const token = sessionStorage.getItem("token");
-            if (!roomId || !userId || !startDate || !endDate) {
+            if (!selectedGH || !roomId || !userId || !startDate || !endDate) {
                 toast.error("Please fill in all fields");
                 return;
             }
@@ -206,6 +229,18 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
             <DialogTitle>Create New Booking</DialogTitle>
             <DialogContent>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel>Guest House</InputLabel>
+                        <Select value={selectedGH}
+                        onChange={(e) => setSelectedGH(e.target.value)}
+                        label="Guest House">
+                            {guestHouses.map((gh) => (
+                                <MenuItem key={gh.id} value={gh.id}>
+                                    {gh.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <FormControl fullWidth sx={{ mt: 2 }}>
                         <InputLabel>Room</InputLabel>
                         <Select
