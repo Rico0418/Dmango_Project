@@ -39,8 +39,8 @@ const ComplaintRoom = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const acceptedPayments = Array.isArray(res.data)
-                ? res.data.filter((payment) => payment.status.trim().toLowerCase() === "accepted")
-                : [];
+                    ? res.data.filter((payment) => payment.status.trim().toLowerCase() === "accepted")
+                    : [];
                 setPayments(acceptedPayments);
             } catch (err) {
                 setError("Failed to fetch booking history");
@@ -99,41 +99,44 @@ const ComplaintRoom = () => {
                         {payments.length === 0 ? (
                             <Typography>No bookings available.</Typography>
                         ) : (
-                            payments.map((payment) => {
-                                const start = new Date(payment.booking.start_date);
-                                const end = new Date(payment.booking.end_date);
-                                const isWithinStay =
-                                    today >= new Date(start.setHours(0, 0, 0, 0)) &&
-                                    today <= new Date(end.setHours(23, 59, 59, 999));
-                                return (
-                                    <Card key={payment.id} sx={{
-                                        mb: 3, borderRadius: 2,
-                                        boxShadow: 3, border: "1px solid #e0e0e0",
-                                    }}>
-                                        <CardContent>
-                                            <Typography variant="h6">
-                                                Room #{payment.booking.room_number.trim()}
-                                            </Typography>
-                                            <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
-                                            <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
-                                            {payment.status !== "Pending" && payment.status !== "Canceled" && isWithinStay && (
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    sx={{ mt: 2 }}
-                                                    onClick={() => {
-                                                        setSelectedRoomId(payment.booking.room_id);
-                                                        setOpenDialog(true);
-                                                    }}
-                                                >
-                                                    Create Complaint
-                                                </Button>
-                                            )}
-                                        </CardContent>
-                                    </Card>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                {payments.map((payment) => {
+                                    const start = new Date(payment.booking.start_date);
+                                    const end = new Date(payment.booking.end_date);
+                                    const isWithinStay =
+                                        today >= new Date(start.setHours(0, 0, 0, 0)) &&
+                                        today <= new Date(end.setHours(23, 59, 59, 999));
+                                    return (
+                                        <Card key={payment.id} sx={{
+                                            mb: 3, borderRadius: 2,
+                                            boxShadow: 3, border: "1px solid #e0e0e0",
+                                            maxWidth: 800, width: "100%"
+                                        }}>
+                                            <CardContent>
 
-                                )
-                            })
+                                                <Typography variant="h6" color="primary">
+                                                    {payment.guest_house_name} - Room #{payment.booking.room_number.trim()}
+                                                </Typography>
+                                                <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
+                                                <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
+                                                {payment.status !== "Pending" && payment.status !== "Canceled" && isWithinStay && (
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        sx={{ mt: 2 }}
+                                                        onClick={() => {
+                                                            setSelectedRoomId(payment.booking.room_id);
+                                                            setOpenDialog(true);
+                                                        }}
+                                                    >
+                                                        Create Complaint
+                                                    </Button>
+                                                )}
+                                            </CardContent>
+                                        </Card>
+                                    )
+                                })}
+                            </div>
                         )}
                     </Box>
                 )}
@@ -143,49 +146,51 @@ const ComplaintRoom = () => {
                         {complaints.length === 0 ? (
                             <Typography>No complaints found.</Typography>
                         ) : (
-                            complaints.map((complaint) => {
-                                const relatedBooking = payments.find(payment =>
-                                    payment.booking.room_id === complaint.room_id
-                                );
-                                let isWithinStay = false;
-                                if(relatedBooking){
-                                    const start = new Date(relatedBooking.booking.start_date);
-                                    const end = new Date(relatedBooking.booking.end_date);
-                                    const startDate = new Date(start.setHours(0,0,0,0));
-                                    const endDate = new Date(end.setHours(23,59,59,999));
-                                    isWithinStay = today >= startDate && today <= endDate;
-                                }
-                                return (
-                                    <Card key={complaint.id} sx={{
-                                        mb: 3, borderRadius: 2,
-                                        boxShadow: 3, border: "1px solid #e0e0e0",
-                                    }}>
-                                        <CardContent>
-                                            <Typography variant="h6">{complaint.guest_house_name}</Typography>
-                                            <Typography variant="h6">Room #{complaint.room_number}</Typography>
-                                            <Typography>Description: {complaint.description}</Typography>
-                                            <Typography>
-                                                Date: {new Date(complaint.created_at).toLocaleDateString()}
-                                            </Typography>
-                                            <Typography>Status: {complaint.status}</Typography>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                {complaints.map((complaint) => {
+                                    const relatedBooking = payments.find(payment =>
+                                        payment.booking.room_id === complaint.room_id
+                                    );
+                                    let isWithinStay = false;
+                                    if (relatedBooking) {
+                                        const start = new Date(relatedBooking.booking.start_date);
+                                        const end = new Date(relatedBooking.booking.end_date);
+                                        const startDate = new Date(start.setHours(0, 0, 0, 0));
+                                        const endDate = new Date(end.setHours(23, 59, 59, 999));
+                                        isWithinStay = today >= startDate && today <= endDate;
+                                    }
+                                    return (
+                                        <Card key={complaint.id} sx={{
+                                            mb: 3, borderRadius: 2,
+                                            boxShadow: 3, border: "1px solid #e0e0e0",
+                                            maxWidth: 800, width: "100%"
+                                        }}>
+                                            <CardContent>
+                                                <Typography variant="h6" color="primary">{complaint.guest_house_name} - Room #{complaint.room_number}</Typography>
+                                                <Typography>Description: {complaint.description}</Typography>
+                                                <Typography>
+                                                    Date: {new Date(complaint.created_at).toLocaleDateString()}
+                                                </Typography>
+                                                <Typography>Status: {complaint.status}</Typography>
 
-                                            <Box sx={{ mt: 2 }}>
-                                                {complaint.status === "Pending" && isWithinStay && (
-                                                    <Button variant="contained" color="warning" sx={{ mr: 1 }} onClick={() => {
-                                                        setSelectedComplaint(complaint);
-                                                        setEditDialogOpen(true);
-                                                    }}>
-                                                        Edit
+                                                <Box sx={{ mt: 2 }}>
+                                                    {complaint.status === "Pending" && isWithinStay && (
+                                                        <Button variant="contained" color="warning" sx={{ mr: 1 }} onClick={() => {
+                                                            setSelectedComplaint(complaint);
+                                                            setEditDialogOpen(true);
+                                                        }}>
+                                                            Edit
+                                                        </Button>
+                                                    )}
+                                                    <Button variant="contained" color="error" onClick={() => handleDeleteComplaint(complaint.id)}>
+                                                        Delete
                                                     </Button>
-                                                )}
-                                                <Button variant="contained" color="error" onClick={() => handleDeleteComplaint(complaint.id)}>
-                                                    Delete
-                                                </Button>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                )
-                            })
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    )
+                                })}
+                            </div>
                         )}
                     </Box>
                 )}

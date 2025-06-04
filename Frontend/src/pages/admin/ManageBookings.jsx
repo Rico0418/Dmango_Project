@@ -20,6 +20,7 @@ const ManageBookings = () => {
             });
             const formattedRows = response.data.map((booking) => ({
                 id: booking.id,
+                guest_house_name: booking.guest_house_name,
                 room_number: booking.room_number,
                 email: booking.email,
                 start_date: booking.start_date.substring(0, 10),

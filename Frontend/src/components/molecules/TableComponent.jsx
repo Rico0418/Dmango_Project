@@ -26,8 +26,8 @@ const TableComponent = ({ columns, rows }) => {
     };
 
     return (
-        <TableContainer component={Paper} sx={{ maxWidth: 800, margin: "auto", mt: 4 }}>
-            <Table>
+        <TableContainer component={Paper} sx={{ maxWidth: 900, margin: "auto", mt: 4 }}>
+            <Table sx={{ minWidth: 600 }}>
                 <TableHead>
                     <TableRow>
                         {columns.map((column, index) => (
