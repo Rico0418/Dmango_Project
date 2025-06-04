@@ -17,10 +17,11 @@ type BookingHandler struct {
 
 func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 	rows, err := h.DB.Query(context.Background(),
-		`SELECT b.id, b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status,b.created_at
+		`SELECT b.id, gh.name,b.room_id, rm.room_number, b.user_id, u.email, b.start_date, b.end_date, b.status,b.created_at
 		FROM bookings b
 		INNER JOIN rooms rm ON b.room_id = rm.id
-		INNER JOIN users u ON b.user_id = u.id`)
+		INNER JOIN users u ON b.user_id = u.id
+		INNER JOIN guest_house gh ON rm.guest_house_id = gh.id`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -29,7 +30,7 @@ func (h *BookingHandler) GetAllBookings(c *gin.Context) {
 	var bookings []models.Booking
 	for rows.Next() {
 		var booking models.Booking
-		if err := rows.Scan(&booking.ID, &booking.RoomID, &booking.RoomNumber,
+		if err := rows.Scan(&booking.ID, &booking.GuestHouseName, &booking.RoomID, &booking.RoomNumber,
 			&booking.UserID, &booking.UserEmail, &booking.StartDate, &booking.EndDate, &booking.Status, &booking.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

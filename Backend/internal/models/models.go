@@ -37,16 +37,17 @@ type Complaint struct {
 	CreatedAt      time.Time `json:"created_at"`
 }
 type Booking struct {
-	ID         int       `json:"id"`
-	UserID     int       `json:"user_id"`
-	UserName   string    `json:"name"`
-	UserEmail  string    `json:"email"`
-	RoomID     int       `json:"room_id"`
-	RoomNumber string    `json:"room_number"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
-	Status     string    `json:"status"` // "pending", "confirmed", "canceled"
-	CreatedAt  time.Time `json:"created_at"`
+	ID             int       `json:"id"`
+	GuestHouseName string    `json:"guest_house_name"`
+	UserID         int       `json:"user_id"`
+	UserName       string    `json:"name"`
+	UserEmail      string    `json:"email"`
+	RoomID         int       `json:"room_id"`
+	RoomNumber     string    `json:"room_number"`
+	StartDate      time.Time `json:"start_date"`
+	EndDate        time.Time `json:"end_date"`
+	Status         string    `json:"status"` // "pending", "confirmed", "canceled"
+	CreatedAt      time.Time `json:"created_at"`
 }
 type BookingRequest struct {
 	RoomID    int    `json:"room_id"`
@@ -55,11 +56,12 @@ type BookingRequest struct {
 	EndDate   string `json:"end_date"`
 }
 type Payment struct {
-	ID        int       `json:"id"`
-	BookingID int       `json:"booking_id"`
-	Amount    float64   `json:"amount"`
-	Method    string    `json:"method"` // "credit_card", "paypal", "cash"
-	Status    string    `json:"status"` // "pending", "completed", "failed"
-	CreatedAt time.Time `json:"created_at"`
-	Booking   *Booking  `json:"booking,omitempty"`
+	ID             int       `json:"id"`
+	GuestHouseName string    `json:"guest_house_name"`
+	BookingID      int       `json:"booking_id"`
+	Amount         float64   `json:"amount"`
+	Method         string    `json:"method"` // "credit_card", "paypal", "cash"
+	Status         string    `json:"status"` // "pending", "completed", "failed"
+	CreatedAt      time.Time `json:"created_at"`
+	Booking        *Booking  `json:"booking,omitempty"`
 }
