@@ -11,7 +11,7 @@ const ManagePaymentDetail = () => {
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/payments`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -124,7 +124,7 @@ const ManagePaymentDetail = () => {
     }
     const handleAccept = async (payment) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const bookingResponse = await axios.get(
                 `${import.meta.env.VITE_API_URL}/bookings/${payment.booking_id}`,
                 {
@@ -196,7 +196,7 @@ const ManagePaymentDetail = () => {
 
     const handleCancel = async (id) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.patch(`${import.meta.env.VITE_API_URL}/payments/${id}`,
                 { status: "canceled" },
                 {
@@ -221,7 +221,7 @@ const ManagePaymentDetail = () => {
     }
     const handleDelete = async (id) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.delete(`${import.meta.env.VITE_API_URL}/payments/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,

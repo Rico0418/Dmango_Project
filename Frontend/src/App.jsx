@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import './App.css'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify';
 import appRoutes from './Route';
+import LoadingScreen from './utils/LoadingScreen';
 
 function AppContent() {
+  const { loading } = useAuth();
+  if (loading) return <LoadingScreen />;
   return(
     <div style={{
       display: "flex",
       flexDirection: "column",
       minHeight: "100vh",
     }}>
-      <Router>
         <Routes>
           {appRoutes.map(({ path, element }, index) => (
             <Route key={index} path={path} element={element} />
@@ -25,14 +27,15 @@ function AppContent() {
           closeOnClick
           pauseOnHover
           draggable />
-      </Router>
     </div>
   )
 }
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+          <AppContent />
+      </Router>
     </AuthProvider>
   )
 }

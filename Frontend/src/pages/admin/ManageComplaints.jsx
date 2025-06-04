@@ -12,7 +12,7 @@ const ManageComplaints = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/complaints`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -63,7 +63,7 @@ const ManageComplaints = () => {
     }
     const handleEdit = async(complaint) => {
         try{
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const response = await axios.put(
                 `${import.meta.env.VITE_API_URL}/complaints/status/${complaint.id}`,
                 { status: "Resolved" },
@@ -86,7 +86,7 @@ const ManageComplaints = () => {
     };
     const handleDelete = async(id) =>{
         try{
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.delete(`${import.meta.env.VITE_API_URL}/complaints/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,

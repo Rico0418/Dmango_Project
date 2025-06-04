@@ -1,34 +1,40 @@
-import { createContext,useContext,useState,useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children}) => {
+export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    useEffect(()=>{
-        const token = localStorage.getItem("token");
-        if(token){
-            try{
-                const decoded = jwt_decode(token);
-                setUser({ id: decoded.user_id, role: decoded.role, token});
-            }catch(error){
-                console.error("Invalid token");
-                localStorage.removeItem("token");
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = sessionStorage.getItem("token");
+            if (token) {
+                try {
+                    const decoded = jwt_decode(token);
+                    setUser({ id: decoded.user_id, role: decoded.role, token });
+                } catch (error) {
+                    console.error("Invalid token");
+                    sessionStorage.removeItem("token");
+                    setUser(null);
+                }
             }
-        }
-    },[]);
+            setLoading(false);
+        };
+        checkAuth();
+    }, []);
     const login = (token) => {
-        localStorage.setItem("token",token);
+        sessionStorage.setItem("token", token);
         const decoded = jwt_decode(token);
-        setUser({id: decoded.user_id, role: decoded.role, token});
+        setUser({ id: decoded.user_id, role: decoded.role, token });
     };
     const logout = () => {
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
         setUser(null);
     }
-    return(
-        <AuthContext.Provider value={{ user,login,logout }}>
-            { children }
+    return (
+        <AuthContext.Provider value={{ user, login, logout, loading }}>
+            {children}
         </AuthContext.Provider>
     );
 };

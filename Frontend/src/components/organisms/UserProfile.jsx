@@ -13,7 +13,7 @@ const UserProfile = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/detail/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -32,7 +32,7 @@ const UserProfile = () => {
         }
 
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.put(
                 `${import.meta.env.VITE_API_URL}/users/password`,
                 { old_password: oldPassword, new_password: newPassword },

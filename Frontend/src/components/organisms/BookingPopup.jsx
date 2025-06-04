@@ -28,7 +28,7 @@ const BookingPopup = ({ open, onClose, room }) => {
   useEffect(() => {
     const fetchBookedDates = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/bookings/room/${room.id}`,
           {
@@ -119,7 +119,7 @@ const BookingPopup = ({ open, onClose, room }) => {
     try {
       console.log("Start Date raw:", startDate);
       console.log("End Date raw:", endDate);
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!startDate || !endDate) {
         toast.error("Please select both start and end date");
         return;

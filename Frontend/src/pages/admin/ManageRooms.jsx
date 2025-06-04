@@ -17,7 +17,7 @@ const ManageRooms = () => {
     const [priceFormMonthly, setPriceFormMonthly] = useState("");
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -120,7 +120,7 @@ const ManageRooms = () => {
                     <Button onClick={() => setOpenPriceDialogDaily(false)}>Cancel</Button>
                     <Button variant="contained" onClick={async () => {
                         try {
-                            const token = localStorage.getItem("token");
+                            const token = sessionStorage.getItem("token");
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "daily",
                                 price: parseFloat(priceForm),
@@ -156,7 +156,7 @@ const ManageRooms = () => {
                     <Button onClick={() => setOpenPriceDialogMonthly(false)}>Cancel</Button>
                     <Button variant="contained" onClick={async () => {
                         try {
-                            const token = localStorage.getItem("token");
+                            const token = sessionStorage.getItem("token");
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "monthly",
                                 price: parseFloat(priceFormMonthly),

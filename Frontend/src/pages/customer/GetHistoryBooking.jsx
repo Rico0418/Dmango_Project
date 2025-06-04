@@ -15,7 +15,7 @@ const GetHistoryBooking = () => {
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });

@@ -23,7 +23,7 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
                 user_id: user.id,
                 description,
             };
-            const token = localStorage.getItem("token")
+            const token = sessionStorage.getItem("token")
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/complaints`, payload,{headers: {
                 Authorization: `Bearer ${token}`
             }});

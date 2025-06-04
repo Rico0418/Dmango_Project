@@ -33,7 +33,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
     useEffect(() => {
         const fetchRoomsAndUsers = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const [roomsResponse, userResponse] = await Promise.all([
                     axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
                         headers: { Authorization: `Bearer ${token}` },
@@ -56,7 +56,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
         if (!roomId) return;
         const fetchBookedDates = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings/room/${roomId}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -156,7 +156,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
 
     const handleSubmit = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             if (!roomId || !userId || !startDate || !endDate) {
                 toast.error("Please fill in all fields");
                 return;

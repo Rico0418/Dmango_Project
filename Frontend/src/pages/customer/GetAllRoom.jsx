@@ -15,7 +15,7 @@ const GetAllRoom = () => {
     useEffect(() => {
         const fetchGuestHouses = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/guest_houses`,{
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -33,7 +33,7 @@ const GetAllRoom = () => {
         if(!selectedGH) return;
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 console.log(token);
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms?guest_house_id=${selectedGH}`, {
                     headers: {

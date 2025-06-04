@@ -20,7 +20,7 @@ const ComplaintRoom = () => {
 
     const fetchComplaints = async () => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/complaints/user/${user.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -34,7 +34,7 @@ const ComplaintRoom = () => {
         if (!user || !user.id) return;
         const fetchPayments = async () => {
             try {
-                const token = localStorage.getItem("token");
+                const token = sessionStorage.getItem("token");
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -55,7 +55,7 @@ const ComplaintRoom = () => {
     };
     const handleDeleteComplaint = async (id) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.delete(`${import.meta.env.VITE_API_URL}/complaints/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ const ComplaintRoom = () => {
 
     const handleUpdateComplaint = async (id, description) => {
         try {
-            const token = localStorage.getItem("token");
+            const token = sessionStorage.getItem("token");
             await axios.put(`${import.meta.env.VITE_API_URL}/complaints/description/${id}`,
                 { description },
                 { headers: { Authorization: `Bearer ${token}` } }
