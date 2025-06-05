@@ -17,13 +17,14 @@ type GuestHouse struct {
 	Location string `json:"location"`
 }
 type Room struct {
-	ID            int      `json:"id"`
-	GuestHouseID  int      `json:"guest_house_id"`
-	RoomNumber    string   `json:"room_number"`
-	Type          string   `json:"type"` // "daily" or "monthly"
-	PricePerDay   *float64 `json:"price_per_day"`
-	PricePerMonth *float64 `json:"price_per_month"`
-	Status        string   `json:"status"` // "available" or "booked"
+	ID             int      `json:"id"`
+	GuestHouseID   int      `json:"guest_house_id"`
+	GuestHouseName string   `json:"guest_house_name"`
+	RoomNumber     string   `json:"room_number"`
+	Type           string   `json:"type"` // "daily" or "monthly"
+	PricePerDay    *float64 `json:"price_per_day"`
+	PricePerMonth  *float64 `json:"price_per_month"`
+	Status         string   `json:"status"` // "available" or "booked"
 }
 type Complaint struct {
 	ID             int       `json:"id"`

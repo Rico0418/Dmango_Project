@@ -16,12 +16,12 @@ type RoomHandler struct {
 }
 func (h *RoomHandler) GetAllRooms(c *gin.Context) {
 	guestHouseID := c.Query("guest_house_id")
-	query := "SELECT * FROM rooms"
+	query := "SELECT rm.id, rm.guest_house_id, gh.name, rm.room_number, rm.type, rm.price_per_day, rm.price_per_month, rm.status FROM rooms rm INNER JOIN guest_house gh ON rm.guest_house_id = gh.id"
 	var rows pgx.Rows
 	var err error
 
 	if guestHouseID != "" {
-		query += " WHERE guest_house_id = $1"
+		query += " WHERE rm.guest_house_id = $1"
 		rows, err = h.DB.Query(context.Background(),query,guestHouseID)
 	}else{
 		rows, err = h.DB.Query(context.Background(), query)
@@ -34,7 +34,7 @@ func (h *RoomHandler) GetAllRooms(c *gin.Context) {
 	var rooms []models.Room
 	for rows.Next() {
 		var room models.Room
-		if err := rows.Scan(&room.ID, &room.GuestHouseID, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Status); err != nil {
+		if err := rows.Scan(&room.ID, &room.GuestHouseID, &room.GuestHouseName, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Status); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -131,6 +131,7 @@ func (h * RoomHandler) UpdateRoomPriceByType(c *gin.Context) {
 	var req struct {
 		Type string `json:"type"`
 		Price float64 `json:"price"`
+		GuestHouseID int `json:"guest_house_id"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -142,11 +143,11 @@ func (h * RoomHandler) UpdateRoomPriceByType(c *gin.Context) {
 	}
 	var query string
 	if req.Type == "daily" {
-		query = `UPDATE rooms SET price_per_day = $1 WHERE type = 'daily'`
+		query = `UPDATE rooms SET price_per_day = $1 WHERE type = 'daily' and guest_house_id = $2`
 	}else{
-		query = `UPDATE rooms SET price_per_month = $1 WHERE type = 'monthly'`
+		query = `UPDATE rooms SET price_per_month = $1 WHERE type = 'monthly' and guest_house_id = $2`
 	}
-	result, err := h.DB.Exec(context.Background(), query, req.Price)
+	result, err := h.DB.Exec(context.Background(), query, req.Price, req.GuestHouseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
