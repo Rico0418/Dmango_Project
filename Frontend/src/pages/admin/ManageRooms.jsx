@@ -3,7 +3,7 @@ import axios from "axios";
 import TableRoomAdmin from "../../components/organisms/TableRoomAdmin";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from "@mui/material";
 
@@ -15,17 +15,39 @@ const ManageRooms = () => {
     const [openPriceDialogMonthly, setOpenPriceDialogMonthly] = useState(false);
     const [priceForm, setPriceForm] = useState("");
     const [priceFormMonthly, setPriceFormMonthly] = useState("");
+    const [guestHouses, setGuestHouses] = useState([]);
+    const [selectedGH, setSelectedGH] = useState('');
+
+    useEffect(() => {
+        const fetchGuestHouses = async () => {
+            try {
+                const token = sessionStorage.getItem("token");
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/guest_houses`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setGuestHouses(response.data);
+                if (response.data.length > 0) {
+                    setSelectedGH(response.data[0].id);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchGuestHouses();
+    }, []);
+
     const fetchData = async () => {
+        if (!selectedGH) return;
         try {
             const token = sessionStorage.getItem("token");
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms`, {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms?guest_house_id=${selectedGH}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
             const formattedRows = response.data.map((room) => ({
                 id: room.id,
-                guest_house_id: room.guest_house_id,
+                guest_house_name: room.guest_house_name,
                 room_number: room.room_number,
                 type: room.type,
                 price_per_day: room.price_per_day,
@@ -40,7 +62,7 @@ const ManageRooms = () => {
     };
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [selectedGH]);
     const getDynamicActions = (room) => {
         let actions = [];
         actions.push({ label: "Edit", color: "primary", onClick: () => handleEdit(room) });
@@ -78,6 +100,23 @@ const ManageRooms = () => {
                     >
                         Room List
                     </Typography>
+                     <Box>
+                        <FormControl sx={{ minWidth: 200, mb: 2 }}>
+                            <InputLabel id="guest-house-select-label">Guest House</InputLabel>
+                            <Select
+                                labelId="guest-house-select-label"
+                                value={selectedGH}
+                                label="Guest House"
+                                onChange={(e) => setSelectedGH(e.target.value)}
+                            >
+                                {guestHouses.map((gh) => (
+                                    <MenuItem key={gh.id} value={gh.id}>
+                                        {gh.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
                     <Box sx={{
                         display: "flex",
                         flexWrap: "wrap",
@@ -98,7 +137,6 @@ const ManageRooms = () => {
                             Change Monthly Room Price
                         </Button>
                     </Box>
-
                     <Box sx={{ mt: 3 }}>
                         <TableRoomAdmin rows={sortedRows} />
                     </Box>
@@ -124,6 +162,7 @@ const ManageRooms = () => {
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "daily",
                                 price: parseFloat(priceForm),
+                                guest_house_id: parseInt(selectedGH)
                             }, {
                                 headers: {
                                     Authorization: `Bearer ${token}`,
@@ -160,6 +199,7 @@ const ManageRooms = () => {
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
                                 type: "monthly",
                                 price: parseFloat(priceFormMonthly),
+                                guest_house_id: parseInt(selectedGH),
                             }, {
                                 headers: {
                                     Authorization: `Bearer ${token}`,
