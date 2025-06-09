@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, Paper, Typography, TextField } from "@mui/material";
 import { toast } from "react-toastify";
 import TableBookingAdmin from "../../components/organisms/TableBookingAdmin";
 import CreateBookingAdmin from "../../components/organisms/CreateBookingAdmin";
@@ -10,6 +10,7 @@ const ManageBookings = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const fetchData = async () => {
         try {
             const token = sessionStorage.getItem("token");
@@ -47,7 +48,16 @@ const ManageBookings = () => {
         }
         return actions;
     };
-    const sortedRows = [...rows].sort((a, b) => {
+    const filteredRows = rows.filter((row) => {
+        const query = searchQuery.toLowerCase();
+        return (
+            row.guest_house_name.toLowerCase().includes(query) ||
+            row.room_number.toLowerCase().includes(query) ||
+            row.email.toLowerCase().includes(query) ||
+            row.status.toLowerCase().includes(query)
+        );
+    });
+    const sortedRows = [...filteredRows].sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
             return sortConfig.direction === "asc" ? -1 : 1;
         }
@@ -93,6 +103,15 @@ const ManageBookings = () => {
                     >
                         Booking List
                     </Typography>
+                    <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                        <TextField
+                            label="Search Booking"
+                            variant="outlined"
+                            size="small"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </Box>
                     <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
@@ -105,9 +124,9 @@ const ManageBookings = () => {
                     </Box>
                 </Paper>
             </Container>
-            <CreateBookingAdmin 
+            <CreateBookingAdmin
                 open={openCreateDialog}
-                onClose={()=>setOpenCreateDialog(false)}
+                onClose={() => setOpenCreateDialog(false)}
                 onBookingCreated={handleBookingCreated}
             />
             <Footer />

@@ -100,12 +100,13 @@ const ComplaintRoom = () => {
                             <Typography>No bookings available.</Typography>
                         ) : (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                {payments.map((payment) => {
+                                {payments.filter((payment) => {
                                     const start = new Date(payment.booking.start_date);
                                     const end = new Date(payment.booking.end_date);
-                                    const isWithinStay =
-                                        today >= new Date(start.setHours(0, 0, 0, 0)) &&
-                                        today <= new Date(end.setHours(23, 59, 59, 999));
+                                    const startDate = new Date(start.setHours(0, 0, 0, 0));
+                                    const endDate = new Date(end.setHours(23, 59, 59, 999));
+                                    return today >= startDate && today <= endDate;
+                                }).map((payment) => {
                                     return (
                                         <Card key={payment.id} sx={{
                                             mb: 3, borderRadius: 2,
@@ -119,19 +120,17 @@ const ComplaintRoom = () => {
                                                 </Typography>
                                                 <Typography>Start Date: {new Date(payment.booking.start_date).toLocaleDateString()}</Typography>
                                                 <Typography>End Date: {new Date(payment.booking.end_date).toLocaleDateString()}</Typography>
-                                                {payment.status !== "Pending" && payment.status !== "Canceled" && isWithinStay && (
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        sx={{ mt: 2 }}
-                                                        onClick={() => {
-                                                            setSelectedRoomId(payment.booking.room_id);
-                                                            setOpenDialog(true);
-                                                        }}
-                                                    >
-                                                        Create Complaint
-                                                    </Button>
-                                                )}
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    sx={{ mt: 2 }}
+                                                    onClick={() => {
+                                                        setSelectedRoomId(payment.booking.room_id);
+                                                        setOpenDialog(true);
+                                                    }}
+                                                >
+                                                    Create Complaint
+                                                </Button>
                                             </CardContent>
                                         </Card>
                                     )
