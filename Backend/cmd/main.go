@@ -87,6 +87,7 @@ func main(){
 
 		protected.GET("/payments",h.GetAllPayments)
 		protected.GET("/payments/user/:user_id",h.GetPaymentDetailbyUserID)
+		protected.GET("/payments/admin/report", h.DownloadPaymentByMonth)
 		protected.POST("/payments",h.CreatePayment)
 		protected.DELETE("/payments/:id",h.DeletePayment)
 		protected.PATCH("/payments/:id",h.UpdatePaymentStatus)

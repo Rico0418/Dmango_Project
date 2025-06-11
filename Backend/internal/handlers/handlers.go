@@ -91,6 +91,54 @@ func (h *Handler) GetPaymentDetailbyUserID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, payments)
 }
+func (h *Handler) DownloadPaymentByMonth(c *gin.Context){
+	month := c.Query("month")
+	year := c.Query("year")
+	if month == "" || year == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "month and year query parameters are required"})
+		return
+	}
+	query := `
+		SELECT p.id, gh.name, p.booking_id, p.amount, p.method, p.status, p.created_at,
+		       b.id, b.user_id, u.name, u.email, b.room_id, rm.room_number, 
+		       b.start_date, b.end_date, b.status
+		FROM payments p
+		INNER JOIN bookings b ON p.booking_id = b.id
+		INNER JOIN rooms rm ON b.room_id = rm.id
+		INNER JOIN guest_house gh ON rm.guest_house_id = gh.id
+		INNER JOIN users u ON b.user_id = u.id
+		WHERE EXTRACT(MONTH FROM p.created_at) = $1 AND EXTRACT(YEAR FROM p.created_at) = $2
+		ORDER BY p.created_at DESC;
+	`
+	rows, err := h.DB.Query(context.Background(), query, month, year)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch payments"})
+		return
+	}
+	defer rows.Close()
+	var payments []models.Payment
+
+	for rows.Next() {
+		var payment models.Payment
+		var booking models.Booking
+
+		err := rows.Scan(
+			&payment.ID, &payment.GuestHouseName, &payment.BookingID, &payment.Amount, &payment.Method, &payment.Status, &payment.CreatedAt,
+			&booking.ID, &booking.UserID, &booking.UserName, &booking.UserEmail, &booking.RoomID, &booking.RoomNumber,
+			&booking.StartDate, &booking.EndDate, &booking.Status,
+		)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning data"})
+			return
+		}
+
+		payment.Booking = &booking
+		payments = append(payments, payment)
+	}
+
+	c.JSON(http.StatusOK, payments)
+}
 func (h *Handler) CreatePayment(c *gin.Context) {
 	var payment models.Payment
 
