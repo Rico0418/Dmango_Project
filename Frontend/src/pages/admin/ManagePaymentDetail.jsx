@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
-import { Box, Button, Container, Paper, Typography } from "@mui/material";
+import { Box, Button, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
 import { toast } from "react-toastify";
 import TablePaymentAdmin from "../../components/organisms/TablePaymentAdmin";
 import { startOfDay } from "date-fns";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 const ManagePaymentDetail = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
     const fetchData = async () => {
         try {
             const token = sessionStorage.getItem("token");
@@ -234,6 +238,57 @@ const ManagePaymentDetail = () => {
             console.error(error);
         }
     };
+    const handleDownloadExcel = async () => {
+        try {
+            const token = sessionStorage.getItem("token");
+            const response = await axios.get(
+                `${import.meta.env.VITE_API_URL}/payments/admin/report?month=${selectedMonth}&year=${selectedYear}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = response.data;
+            if (!data || !Array.isArray(data)) {
+                toast.info("No payments found for selected month and year");
+                return;
+            }
+            if (data.length === 0) {
+                toast.info("No payments found for selected month and year");
+                return;
+            }
+            const mappedData = data.map((payment) => ({
+                ID: payment.id,
+                GuestHouse: payment.guest_house_name,
+                BookingID: payment.booking_id,
+                Amount: payment.amount,
+                Method: payment.method,
+                PaymentStatus: payment.status,
+                PaymentDate: payment.created_at,
+                UserName: payment.booking?.name,
+                UserEmail: payment.booking?.email,
+                RoomNumber: payment.booking?.room_number,
+                BookingStatus: payment.booking?.status,
+                StartDate: payment.booking?.start_date,
+                EndDate: payment.booking?.end_date,
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(mappedData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Payments");
+
+            const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+            const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+            saveAs(blob, `monthly_payments_${selectedMonth}_${selectedYear}.xlsx`);
+        } catch (error) {
+            console.error("Error downloading report:", error);
+            if (error.response?.status === 404 || error.response?.data?.error === "No payments found") {
+                toast.info("No payments found for selected month and year");
+            } else {
+                toast.error("Failed to download payment report");
+            }
+        }
+    };
     return (
         <div>
             <Navbar />
@@ -253,6 +308,98 @@ const ManagePaymentDetail = () => {
                     <Button onClick={() => handleSort("status")} variant="contained">
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
+
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: "center",
+                        gap: 2,
+                        mt: 3,
+                        flexWrap: 'wrap'
+                    }}>
+
+                        <FormControl sx={{ minWidth: 140 }}>
+                            <InputLabel id="month-select-label" sx={{ color: 'text.primary' }}>Month</InputLabel>
+                            <Select
+                                labelId="month-select-label"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                label="Month"
+                                sx={{
+                                    bgcolor: 'background.paper',
+                                    borderRadius: '8px',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'divider'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'primary.main'
+                                    }
+                                }}
+                            >
+                                <MenuItem value=""><em>Select month</em></MenuItem>
+                                {Array.from({ length: 12 }, (_, i) => (
+                                    <MenuItem key={i + 1} value={i + 1}>
+                                        {new Date(0, i).toLocaleString("default", { month: "long" })}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <FormControl sx={{ minWidth: 140 }}>
+                            <InputLabel id="year-select-label" sx={{ color: 'text.primary' }}>Year</InputLabel>
+                            <Select
+                                labelId="year-select-label"
+                                value={selectedYear}
+                                onChange={(e) => setSelectedYear(e.target.value)}
+                                label="Year"
+                                sx={{
+                                    bgcolor: 'background.paper',
+                                    borderRadius: '8px',
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'divider'
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: 'primary.main'
+                                    }
+                                }}
+                            >
+                                <MenuItem value=""><em>Select year</em></MenuItem>
+                                {Array.from({ length: 5 }, (_, i) => {
+                                    const year = new Date().getFullYear() - i;
+                                    return <MenuItem key={year} value={year}>{year}</MenuItem>;
+                                })}
+                            </Select>
+                        </FormControl>
+
+                        <Button
+                            variant="contained"
+                            onClick={handleDownloadExcel}
+                            disabled={!selectedMonth || !selectedYear}
+                            sx={{
+                                height: 56,
+                                px: 3,
+                                borderRadius: '8px',
+                                bgcolor: 'primary.main',
+                                color: 'primary.contrastText',
+                                fontWeight: 600,
+                                letterSpacing: 0.5,
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                    boxShadow: '0 6px 8px rgba(0,0,0,0.08)',
+                                    transform: 'translateY(-1px)'
+                                },
+                                '&:disabled': {
+                                    bgcolor: 'action.disabledBackground',
+                                    color: 'text.disabled'
+                                },
+                                transition: 'all 0.2s ease-in-out'
+                            }}
+                        >
+                            Download Monthly Report
+                        </Button>
+                    </Box>
+
                     <Box sx={{ mt: 3 }}>
                         <TablePaymentAdmin rows={sortedRows} />
                     </Box>
