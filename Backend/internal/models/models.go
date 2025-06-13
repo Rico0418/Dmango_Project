@@ -66,3 +66,8 @@ type Payment struct {
 	CreatedAt      time.Time `json:"created_at"`
 	Booking        *Booking  `json:"booking,omitempty"`
 }
+type Suggestion struct {
+	ID          int       `json:"id"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+}
