@@ -21,11 +21,13 @@ const Contact = LazyWithTimeout(()=> import("./pages/ContactPage"));
 const ManageComplaints = LazyWithTimeout(() => import("./pages/admin/ManageComplaints"));
 const ManageBookings = LazyWithTimeout(() => import("./pages/admin/ManageBookings"));
 const ManagePaymentDetail = LazyWithTimeout(() => import("./pages/admin/ManagePaymentDetail"));
+const ManageSuggestion = LazyWithTimeout(()=> import("./pages/admin/ManageSuggestion"));
 
 const BookingHistory = LazyWithTimeout(() => import("./pages/customer/GetHistoryBooking"));
 const RoomList = LazyWithTimeout(() => import("./pages/customer/GetAllRoom"));
 const RoomDetail = LazyWithTimeout(() => import("./pages/customer/GetDetailRoom"));
-const ComplaintRoom = LazyWithTimeout(() => import("./pages/customer/ComplaintRoom"))
+const ComplaintRoom = LazyWithTimeout(() => import("./pages/customer/ComplaintRoom"));
+
 
 const routesConfig = [
   { path: "/login", element: Login, protected: false },
@@ -42,6 +44,7 @@ const routesConfig = [
   { path: "/admin/manage-rooms", element: ManageRooms, role: "admin", protected: true },
   { path: "/admin/manage-bookings", element: ManageBookings, role: "admin", protected: true },
   { path: "/admin/manage-payments", element: ManagePaymentDetail, role: "admin", protected: true},
+  { path: "/admin/manage-suggestion", element: ManageSuggestion, role: "admin", protected: true},
 
   // // Customer Routes (only accessible by customers)
   { path: "/customer/bookings", element: BookingHistory, role: "customer", protected: true },

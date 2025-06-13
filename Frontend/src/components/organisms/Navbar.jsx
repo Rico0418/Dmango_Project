@@ -31,7 +31,8 @@ const Navbar = () => {
             { label: "Manage Complaints", path: "/admin/manage-complaints" },
             { label: "Manage Rooms", path: "/admin/manage-rooms" },
             { label: "Manage Bookings", path: "/admin/manage-bookings" },
-            { label: "Manage Payments", path: "/admin/manage-payments" }
+            { label: "Manage Payments", path: "/admin/manage-payments" },
+            { label: "Manage Suggestion", path: "/admin/manage-suggestion"},
         ] : []),
         ...(user?.role === "customer" ? [
             { label: "Rooms", path: "/customer/rooms" },
