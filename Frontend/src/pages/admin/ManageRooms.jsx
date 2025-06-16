@@ -52,6 +52,7 @@ const ManageRooms = () => {
                 type: room.type,
                 price_per_day: room.price_per_day,
                 price_per_month: room.price_per_month,
+                facilities: room.facilities,
                 status: room.status,
                 actions: getDynamicActions(room),
             }));

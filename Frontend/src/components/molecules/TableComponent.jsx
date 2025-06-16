@@ -26,7 +26,7 @@ const TableComponent = ({ columns, rows }) => {
     };
 
     return (
-        <TableContainer component={Paper} sx={{ maxWidth: 900, margin: "auto", mt: 4 }}>
+        <TableContainer component={Paper} sx={{ maxWidth: 1200, margin: "auto", mt: 4 }}>
             <Table sx={{ minWidth: 600 }}>
                 <TableHead>
                     <TableRow>
@@ -43,7 +43,11 @@ const TableComponent = ({ columns, rows }) => {
                     {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, rowIndex) => (
                         <TableRow key={rowIndex}>
                             {columns.map((column, colIndex) => (
-                                <TableCell key={colIndex} sx={{ textAlign: "center" }}>{row[column.field]}</TableCell>
+                                <TableCell key={colIndex} sx={{ textAlign: "center" }}>
+                                    {column.field === "facilities" && Array.isArray(row[column.field])
+                                        ? row[column.field].join(", ")
+                                        : row[column.field]}
+                                </TableCell>
                             ))}
                              <TableCell sx={{ textAlign: "center" }}>
                                 {row.actions && row.actions.map((action, actionIndex) => (

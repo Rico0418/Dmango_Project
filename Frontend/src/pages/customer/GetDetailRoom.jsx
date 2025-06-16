@@ -104,6 +104,12 @@ const GetDetailRoom = () => {
                                     <strong>Price Per Month:</strong> Rp {room.price_per_month.toLocaleString()}
                                 </TypographyTemplate>
                             )}
+                            <TypographyTemplate variant="body1">
+                                <strong>Facilities:</strong>{" "}
+                                {room.facilities && room.facilities.length > 0
+                                    ? room.facilities.join(", ")
+                                    : "None"}
+                            </TypographyTemplate>
                         </Box>
                         <Box mt={4}>
                             <Button variant="contained" color="primary" onClick={() => setDialogOpen(true)}>

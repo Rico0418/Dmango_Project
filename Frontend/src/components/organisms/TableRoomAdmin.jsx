@@ -6,6 +6,7 @@ const columns = [
     { field: "type", label: "Room Type"},
     { field: "price_per_day", label: "Price Per Day"},
     { field: "price_per_month", label: "Price Per Month"},
+    { field: "facilities", label: "Facilities"},
     { field: "status", label: "Status"},
 ]
 const TableRoomAdmin = ({rows}) => {
