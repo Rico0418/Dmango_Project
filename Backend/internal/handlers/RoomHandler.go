@@ -16,7 +16,7 @@ type RoomHandler struct {
 }
 func (h *RoomHandler) GetAllRooms(c *gin.Context) {
 	guestHouseID := c.Query("guest_house_id")
-	query := "SELECT rm.id, rm.guest_house_id, gh.name, rm.room_number, rm.type, rm.price_per_day, rm.price_per_month, rm.status FROM rooms rm INNER JOIN guest_house gh ON rm.guest_house_id = gh.id"
+	query := "SELECT rm.id, rm.guest_house_id, gh.name, rm.room_number, rm.type, rm.price_per_day, rm.price_per_month, rm.facilities, rm.status FROM rooms rm INNER JOIN guest_house gh ON rm.guest_house_id = gh.id"
 	var rows pgx.Rows
 	var err error
 
@@ -34,7 +34,7 @@ func (h *RoomHandler) GetAllRooms(c *gin.Context) {
 	var rooms []models.Room
 	for rows.Next() {
 		var room models.Room
-		if err := rows.Scan(&room.ID, &room.GuestHouseID, &room.GuestHouseName, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Status); err != nil {
+		if err := rows.Scan(&room.ID, &room.GuestHouseID, &room.GuestHouseName, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Facilities, &room.Status); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -52,14 +52,14 @@ func (h *RoomHandler) GetDetailRoom(c *gin.Context) {
 
 	if roomNumber != "" {
 		err = h.DB.QueryRow(context.Background(), `
-			SELECT id, guest_house_id, room_number, type, price_per_day, price_per_month, status 
+			SELECT id, guest_house_id, room_number, type, price_per_day, price_per_month, facilities, status 
 			FROM rooms WHERE room_number = $1`, roomNumber).
-			Scan(&room.ID, &room.GuestHouseID, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Status)
+			Scan(&room.ID, &room.GuestHouseID, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Facilities, &room.Status)
 	} else {
 		err = h.DB.QueryRow(context.Background(), `
-			SELECT id, guest_house_id, room_number, type, price_per_day, price_per_month, status 
+			SELECT id, guest_house_id, room_number, type, price_per_day, price_per_month, facilities, status 
 			FROM rooms WHERE id = $1`, id).
-			Scan(&room.ID, &room.GuestHouseID, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth, &room.Status)
+			Scan(&room.ID, &room.GuestHouseID, &room.RoomNumber, &room.Type, &room.PricePerDay, &room.PricePerMonth,&room.Facilities, &room.Status)
 	}
 
 	if err != nil {
