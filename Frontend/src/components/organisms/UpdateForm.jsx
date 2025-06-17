@@ -9,6 +9,7 @@ const UpdateRoomForm = () => {
     const [pricePerDay, setPricePerDay] = useState("");
     const [pricePerMonth, setPricePerMonth] = useState("");
     const [status, setStatus] = useState("");
+    const [facilities, setFacilities] = useState("");
     const navigate = useNavigate();
     const { id } = useParams();
     useEffect(() => {
@@ -22,6 +23,7 @@ const UpdateRoomForm = () => {
                 setPricePerDay(room.price_per_day || "");
                 setPricePerMonth(room.price_per_month || "");
                 setStatus(room.status || "");
+                setFacilities(room.facilities ? room.facilities.join(","): "");
             } catch (error) {
                 toast.error("Failed to load room data");
                 console.error(error);
@@ -35,11 +37,13 @@ const UpdateRoomForm = () => {
             toast.error("Please One Of Column");
             return;
         }
+        const facilitiesArray = facilities.split(",").map((item)=> item.trim()).filter((item)=>item.length > 0) || [];
         try {
             const token = sessionStorage.getItem("token");
             const response = await axios.put(`${import.meta.env.VITE_API_URL}/rooms/${id}`, {
                 price_per_day: parseFloat(pricePerDay),
                 price_per_month: parseFloat(pricePerMonth),
+                facilities: facilitiesArray.length > 0 ? facilitiesArray : null,
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -65,7 +69,7 @@ const UpdateRoomForm = () => {
                     borderRadius: 2,
                 }}
             >
-                <TypographyTemplate variant="h5">Update Room Price</TypographyTemplate>
+                <TypographyTemplate variant="h5">Update Room</TypographyTemplate>
 
                 <TextField
                     label="Room Status"
@@ -89,6 +93,14 @@ const UpdateRoomForm = () => {
                     value={pricePerMonth}
                     onChange={(e) => setPricePerMonth(e.target.value)}
                     fullWidth
+                />
+
+                <TextField
+                    label="Facilities (comma-separated, e.g., toilet, television, ac)"
+                    value={facilities}
+                    onChange={(e) => setFacilities(e.target.value)}
+                    fullWidth
+                    helperText="Enter facilities separated by commas"
                 />
 
                 <Button type="submit" variant="contained" color="primary">

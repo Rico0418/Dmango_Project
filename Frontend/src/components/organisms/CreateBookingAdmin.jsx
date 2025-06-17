@@ -269,6 +269,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
                             ))}
                         </Select>
                     </FormControl>
+                    <Typography>Start Date:</Typography>
                     <StaticDatePicker
                         label="Start Date"
                         value={startDate}
@@ -276,6 +277,7 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
                         shouldDisableDate={shouldDisableDate}
                         slots={{ day: renderDayWithTooltip }}
                     />
+                    <Typography>End Date:</Typography>
                     <StaticDatePicker
                         label="End Date"
                         value={endDate}
