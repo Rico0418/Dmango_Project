@@ -81,9 +81,9 @@ func (h *RoomHandler) UpdateRoomPrice(c *gin.Context) {
 
 	result, err := h.DB.Exec(context.Background(), `
 		UPDATE rooms 
-		SET price_per_day = $1, price_per_month = $2 
-		WHERE id = $3`, 
-		room.PricePerDay, room.PricePerMonth, id)
+		SET price_per_day = $1, price_per_month = $2, facilities = $3
+		WHERE id = $4`, 
+		room.PricePerDay, room.PricePerMonth, room.Facilities, id)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
