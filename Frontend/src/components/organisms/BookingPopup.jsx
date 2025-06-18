@@ -237,10 +237,10 @@ const BookingPopup = ({ open, onClose, room }) => {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">
+        <Button onClick={onClose} color="secondary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
           Cancel
         </Button>
-        <Button onClick={handleBook} variant="contained" color="primary">
+        <Button onClick={handleBook} variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
           Confirm Booking
         </Button>
       </DialogActions>

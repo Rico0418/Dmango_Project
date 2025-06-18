@@ -112,13 +112,13 @@ const ManageBookings = () => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </Box>
-                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
+                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
-                    <Button onClick={() => handleSort("status")} variant="contained" sx={{ marginRight: 2 }}>
+                    <Button onClick={() => handleSort("status")} variant="contained" sx={{ marginRight: 2,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
-                    <Button variant="contained" color="primary" onClick={() => setOpenCreateDialog(true)}>Create Booking</Button>
+                    <Button variant="contained" color="primary" onClick={() => setOpenCreateDialog(true)} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>Create Booking</Button>
                     <Box sx={{ mt: 3 }}>
                         <TableBookingAdmin rows={sortedRows} />
                     </Box>

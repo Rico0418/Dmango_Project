@@ -28,8 +28,8 @@ const EditComplaintForm = ({open, onClose, complaint, onSubmit}) => {
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>Cancel</Button>
-                <Button onClick={handleSave} variant="contained" color="primary">
+                <Button onClick={onClose} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>Cancel</Button>
+                <Button onClick={handleSave} variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                     Save
                 </Button>
             </DialogActions>

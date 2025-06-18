@@ -293,10 +293,10 @@ const CreateBookingAdmin = ({ open, onClose, onBookingCreated }) => {
                 </LocalizationProvider>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
+                <Button onClick={onClose} color="secondary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                     Cancel
                 </Button>
-                <Button onClick={handleSubmit} variant="contained" color="primary">
+                <Button onClick={handleSubmit} variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                     Create Booking
                 </Button>
             </DialogActions>

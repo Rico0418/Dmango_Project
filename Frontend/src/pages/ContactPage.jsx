@@ -93,10 +93,10 @@ const ContactPage = () => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="secondary">
+                    <Button onClick={handleClose} color="secondary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Cancel
                     </Button>
-                    <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
+                    <Button type="submit" variant="contained" color="primary" onClick={handleSubmit} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Submit
                     </Button>
                 </DialogActions>

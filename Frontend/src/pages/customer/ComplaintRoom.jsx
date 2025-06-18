@@ -123,7 +123,7 @@ const ComplaintRoom = () => {
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
-                                                    sx={{ mt: 2 }}
+                                                    sx={{ mt: 2,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                                     onClick={() => {
                                                         setSelectedRoomId(payment.booking.room_id);
                                                         setOpenDialog(true);
@@ -174,14 +174,14 @@ const ComplaintRoom = () => {
 
                                                 <Box sx={{ mt: 2 }}>
                                                     {complaint.status === "Pending" && isWithinStay && (
-                                                        <Button variant="contained" color="warning" sx={{ mr: 1 }} onClick={() => {
+                                                        <Button variant="contained" color="warning" sx={{ mr: 1,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }} onClick={() => {
                                                             setSelectedComplaint(complaint);
                                                             setEditDialogOpen(true);
                                                         }}>
                                                             Edit
                                                         </Button>
                                                     )}
-                                                    <Button variant="contained" color="error" onClick={() => handleDeleteComplaint(complaint.id)}>
+                                                    <Button variant="contained" color="error" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }} onClick={() => handleDeleteComplaint(complaint.id)}>
                                                         Delete
                                                     </Button>
                                                 </Box>

@@ -115,7 +115,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                                 color="success"
                                                 size="small"
                                                 onClick={() => handleWhatsAppRedirect(payment)}
-                                                sx={{ textTransform: "none" }}
+                                                sx={{ textTransform: "none","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                             >
                                                 Contact via WhatsApp
                                             </Button>
@@ -128,7 +128,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                                 color="primary"
                                                 size="small"
                                                 onClick={() => handleDownloadInvoice(payment)}
-                                                sx={{ textTransform: "none" }}
+                                                sx={{ textTransform: "none","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                             >
                                                 Download Invoice
                                             </Button>

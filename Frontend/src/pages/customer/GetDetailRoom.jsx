@@ -75,7 +75,7 @@ const GetDetailRoom = () => {
                                     size="small"
                                     onClick={handleNext}
                                     disabled={activeStep === maxSteps - 1}
-                                    sx={{ color: "#1976d2" }}
+                                    sx={{ color: "#1976d2", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                 >
                                     <KeyboardArrowRight />
                                 </Button>
@@ -85,7 +85,7 @@ const GetDetailRoom = () => {
                                     size="small"
                                     onClick={handleBack}
                                     disabled={activeStep === 0}
-                                    sx={{ color: "#1976d2" }}
+                                    sx={{ color: "#1976d2","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                 >
                                     <KeyboardArrowLeft />
                                 </Button>
@@ -139,6 +139,7 @@ const GetDetailRoom = () => {
                                     fontWeight: 600,
                                     borderRadius: 8,
                                     textTransform: "none",
+                                    "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" }
                                 }}
                             >
                                 Book Room

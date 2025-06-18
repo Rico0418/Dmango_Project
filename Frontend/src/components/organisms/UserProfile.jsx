@@ -87,7 +87,7 @@ const UserProfile = () => {
                         variant="contained"
                         color="primary"
                         fullWidth
-                        sx={{ mt: 2 }}
+                        sx={{ mt: 2,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                         onClick={handleChangePassword}
                     >
                         Update Password

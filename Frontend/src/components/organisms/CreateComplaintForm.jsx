@@ -56,10 +56,10 @@ const CreateComplaintDialog = ({ open, onClose, roomId, onComplaintCreated }) =>
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose} color="inherit">
+                    <Button onClick={onClose} color="inherit" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} variant="contained" disabled={!description.trim()}>
+                    <Button onClick={handleSubmit} variant="contained" disabled={!description.trim()} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Submit
                     </Button>
                 </DialogActions>

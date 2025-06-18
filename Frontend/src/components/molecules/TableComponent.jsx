@@ -56,7 +56,7 @@ const TableComponent = ({ columns, rows }) => {
                                         variant="contained"
                                         color={action.color || "primary"}
                                         size="small"
-                                        sx={{ ml: actionIndex > 0 ? 1 : 0 , minWidth: 150, margin:1.5}}
+                                        sx={{ ml: actionIndex > 0 ? 1 : 0 , minWidth: 150, margin:1.5, "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" }}}
                                         onClick={() => action.onClick(row)}
                                     >
                                         {action.label}

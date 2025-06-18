@@ -112,10 +112,10 @@ const ManageComplaints = () => {
                     >
                         Complaint List
                     </Typography>
-                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2 }}>
+                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2, "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
-                    <Button onClick={() => handleSort("status")} variant="contained">
+                    <Button onClick={() => handleSort("status")} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
                     <Box sx={{ mt: 3 }}>

@@ -125,16 +125,16 @@ const ManageRooms = () => {
                         justifyContent: { xs: "center" },
                         mb: 2,
                     }}>
-                        <Button onClick={() => handleSort("id")} variant="contained">
+                        <Button onClick={() => handleSort("id")} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                             Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                         </Button>
-                        <Button onClick={() => handleSort("status")} variant="contained">
+                        <Button onClick={() => handleSort("status")} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                             Sort by Status {sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                         </Button>
-                        <Button onClick={() => setOpenPriceDialogDaily(true)} variant="contained">
+                        <Button onClick={() => setOpenPriceDialogDaily(true)} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                             Change Daily Room Price
                         </Button>
-                        <Button onClick={() => setOpenPriceDialogMonthly(true)} variant="contained">
+                        <Button onClick={() => setOpenPriceDialogMonthly(true)} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                             Change Monthly Room Price
                         </Button>
                     </Box>
@@ -156,8 +156,8 @@ const ManageRooms = () => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenPriceDialogDaily(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={async () => {
+                    <Button onClick={() => setOpenPriceDialogDaily(false)} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>Cancel</Button>
+                    <Button variant="contained"  sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }} onClick={async () => {
                         try {
                             const token = sessionStorage.getItem("token");
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {
@@ -193,8 +193,8 @@ const ManageRooms = () => {
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenPriceDialogMonthly(false)}>Cancel</Button>
-                    <Button variant="contained" onClick={async () => {
+                    <Button onClick={() => setOpenPriceDialogMonthly(false)} sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>Cancel</Button>
+                    <Button variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }} onClick={async () => {
                         try {
                             const token = sessionStorage.getItem("token");
                             await axios.put(`${import.meta.env.VITE_API_URL}/rooms/update-price`, {

@@ -103,7 +103,7 @@ const UpdateRoomForm = () => {
                     helperText="Enter facilities separated by commas"
                 />
 
-                <Button type="submit" variant="contained" color="primary">
+                <Button type="submit" variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                     Update Room
                 </Button>
             </Box>
