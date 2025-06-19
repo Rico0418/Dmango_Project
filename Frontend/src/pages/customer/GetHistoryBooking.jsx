@@ -44,26 +44,67 @@ Berikut pesanan saya yang saya sudah buat di web
         const url = `https://wa.me/${PhoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
     };
-    const handleDownloadInvoice = (payment) => {
-        const data = [
-            {
-                "Booking ID": payment.booking.id,
-                "Name": payment.booking.name,
-                "Email": payment.booking.email,
-                "Guest House": payment.guest_house_name.trim(),
-                "Room Number": payment.booking.room_number.trim(),
-                "Start-date": new Date(payment.booking.start_date).toLocaleDateString(),
-                "End-date": new Date(payment.booking.end_date).toLocaleDateString(),
-                "Amount (Rp)": payment.amount,
-                "Status": payment.status.trim(),
-            }
-        ];
-        const worksheet = XLSX.utils.json_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Invoice");
 
-        const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-        const fileName = `Invoice_Booking_${payment.booking.name}.xlsx`;
+    const numberToWords = (num) => {
+        const units = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan"];
+        const teens = ["Sepuluh", "Sebelas", "Dua Belas", "Tiga Belas", "Empat Belas", "Lima Belas", "Enam Belas", "Tujuh Belas", "Delapan Belas", "Sembilan Belas"];
+        const tens = ["", "", "Dua Puluh", "Tiga Puluh", "Empat Puluh", "Lima Puluh", "Enam Puluh", "Tujuh Puluh", "Delapan Puluh", "Sembilan Puluh"];
+
+        if (num === 0) return "Nol";
+        if (num < 0) return "Minus " + numberToWords(Math.abs(num));
+        if (num <= 9) return units[num];
+        if (num <= 19) return teens[num - 10];
+        if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + units[num % 10] : "");
+        if (num < 1000) return units[Math.floor(num / 100)] + " Ratus" + (num % 100 ? " " + numberToWords(num % 100) : "");
+        if (num < 2000000) return numberToWords(Math.floor(num / 1000)) + " Ribu" + (num % 1000 ? " " + numberToWords(num % 1000) : "");
+        if (num < 2000000000) return numberToWords(Math.floor(num / 1000000)) + " Juta" + (num % 1000000 ? " " + numberToWords(num % 1000000) : "");
+
+        return "Terlalu Besar";
+    };
+
+    const handleDownloadInvoice = (payment) => {
+        const wb = XLSX.utils.book_new();
+        const wsData = [];
+
+        const invoiceNo = `001-2/${new Date(payment.booking.start_date).toLocaleString("default", { month: "short" }).toUpperCase()}/01/${new Date(payment.booking.start_date).getFullYear()}`;
+        wsData.push([{ t: "s", v: "No :" }, { t: "s", v: invoiceNo }, {}, {}, {}]);
+        wsData.push([{ t: "s", v: "Telah terima dari :" }, { t: "s", v: payment.booking.name }, {}, {}, {}]);
+        wsData.push([{ t: "s", v: "Uang sejumlah :" }, { t: "s", v: numberToWords(payment.amount) + " Rupiah" }, {}, {}, {}]);
+        wsData.push([{ t: "s", v: "Untuk pembayaran :" }, { t: "s", v: "" }, {}, {}, {}]);
+
+        wsData.push([{ t: "s", v: "Keterangan" }, {}, {}, {}, {}]);
+        wsData.push([{ t: "s", v: "Uang Jaminan Kamar Kost" }, {}, {}, {}, {}]);
+        wsData.push([{ t: "s", v: "V" }, { t: "s", v: "Sewa Kost" }, {}, {}, { t: "n", v: payment.amount, s: { numFmt: "Rp #,##0" } }]);
+        wsData.push([{ t: "s", v: "-" }, { t: "s", v: "Periode" }, { t: "s", v: `${new Date(payment.booking.start_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")} - ${new Date(payment.booking.end_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}` }, {}, {}]);
+        wsData.push([{ t: "s", v: "-" }, { t: "s", v: "Kamar No." }, { t: "s", v: `#${payment.booking.room_number.trim()}` }, {}, {}]);
+
+        wsData.push([{}, {}, {}, {}, {}]);
+
+        wsData.push([{ t: "s", v: "Total" }, {t: "s", v: "Rp"},{}, { t: "n", v: payment.amount, s: { numFmt: "Rp #,##0", alignment: { horizontal: "right" } } }]);
+        wsData.push([{}, {}, {}, { t: "s", v: `Semarang, ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}` }, {}]);
+        wsData.push([{}, {}, {}, { t: "s", v: "" }, {}]); // Placeholder for signature
+
+        // Create worksheet
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+
+        ws["!merges"] = [
+            { s: { r: 0, c: 1 }, e: { r: 0, c: 4 } }, // No
+            { s: { r: 1, c: 1 }, e: { r: 1, c: 4 } }, // Telah terima dari
+            { s: { r: 2, c: 1 }, e: { r: 2, c: 4 } }, // Uang sejumlah
+            { s: { r: 3, c: 1 }, e: { r: 3, c: 4 } }, // Untuk pembayaran
+            { s: { r: 5, c: 1 }, e: { r: 5, c: 4 } }, // Uang Jaminan Kamar Kost
+            { s: { r: 9, c: 1 }, e: { r: 9, c: 4 } }, // Rp total
+        ];
+
+        // Set column widths
+        ws["!cols"] = [{ wch: 15 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 10 }];
+
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Invoice");
+
+        const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        const fileName = `Invoice_Booking_${payment.booking.name}_${new Date().toISOString().split("T")[0]}.xlsx`;
         const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
         saveAs(blob, fileName);
     }
@@ -115,7 +156,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                                 color="success"
                                                 size="small"
                                                 onClick={() => handleWhatsAppRedirect(payment)}
-                                                sx={{ textTransform: "none","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                                                sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                             >
                                                 Contact via WhatsApp
                                             </Button>
@@ -128,7 +169,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                                 color="primary"
                                                 size="small"
                                                 onClick={() => handleDownloadInvoice(payment)}
-                                                sx={{ textTransform: "none","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                                                sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                             >
                                                 Download Invoice
                                             </Button>
@@ -144,7 +185,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                 page={currentPage}
                                 onChange={handleChangePage}
                                 color="primary"
-                                sx={{ mt: 2,"& .MuiPaginationItem-root": { outline: "none !important" }, "& .Mui-selected": { outline: "none !important" }, "& .MuiPaginationItem-root.Mui-selected:focus": { outline: "none !important", boxShadow: "none" }, "& .MuiPaginationItem-root:focus": { outline: "none !important", boxShadow: "none" }}}
+                                sx={{ mt: 2, "& .MuiPaginationItem-root": { outline: "none !important" }, "& .Mui-selected": { outline: "none !important" }, "& .MuiPaginationItem-root.Mui-selected:focus": { outline: "none !important", boxShadow: "none" }, "& .MuiPaginationItem-root:focus": { outline: "none !important", boxShadow: "none" } }}
                             />
                         )}
                     </div>
