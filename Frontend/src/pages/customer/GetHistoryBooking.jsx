@@ -144,7 +144,7 @@ Berikut pesanan saya yang saya sudah buat di web
                                 page={currentPage}
                                 onChange={handleChangePage}
                                 color="primary"
-                                sx={{ mt: 2 }}
+                                sx={{ mt: 2,"& .MuiPaginationItem-root": { outline: "none !important" }, "& .Mui-selected": { outline: "none !important" }, "& .MuiPaginationItem-root.Mui-selected:focus": { outline: "none !important", boxShadow: "none" }, "& .MuiPaginationItem-root:focus": { outline: "none !important", boxShadow: "none" }}}
                             />
                         )}
                     </div>

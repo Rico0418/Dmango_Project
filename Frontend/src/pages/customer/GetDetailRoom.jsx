@@ -1,9 +1,15 @@
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
-import { Box, Button, Card, CardContent, CardMedia, Container, MobileStepper, Paper } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, Container, Link, MobileStepper, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import picture1 from "../../assets/Room Residence 1/picture_1.jpg";
+import picture2 from "../../assets/Room Residence 1/picture_2.jpg";
+import picture3 from "../../assets/Room Residence 1/picture_3.jpg";
+import picture4 from "../../assets/Room Residence 1/picture_4.jpg";
+import video1 from "../../assets/Room Residence 1/videos_1.mp4";
+import video2 from "../../assets/videos_2.mp4"
 import roomImage from "../../assets/room.png";
 import toilet from "../../assets/toilet.jpg"
 import TypographyTemplate from "../../components/molecules/Typography";
@@ -14,7 +20,8 @@ import BookingPopup from "../../components/organisms/BookingPopup";
 const GetDetailRoom = () => {
     const { id } = useParams();
     const [room, setRoom] = useState(null);
-    const images = [roomImage, toilet];
+    const images = [roomImage, toilet, video2];
+    const images1 = [picture1, picture2, picture3, picture4, video1];
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
 
@@ -38,9 +45,12 @@ const GetDetailRoom = () => {
         };
         fetchRoomDetail();
     }, [id]);
-    const maxSteps = images.length;
+    const displayedImages = room?.guest_house_id === 2 ? images1 : images;
+    const maxSteps = displayedImages.length;
     const handleNext = () => setActiveStep((prev) => prev + 1);
     const handleBack = () => setActiveStep((prev) => prev - 1);
+
+    const isVideo = displayedImages[activeStep] instanceof HTMLVideoElement || /\.(mp4|webm|ogg)$/i.test(displayedImages[activeStep]);
     return (
         <div>
             <Navbar />
@@ -48,8 +58,9 @@ const GetDetailRoom = () => {
                 {room && (
                     <Card sx={{ boxShadow: 4, borderRadius: 2, overflow: "hidden" }}>
                         <CardMedia
-                            component="img"
-                            image={images[activeStep]}
+                            component={isVideo ? "video" : "img"}
+                            image={!isVideo ? displayedImages[activeStep] : undefined}
+                            src={isVideo ? displayedImages[activeStep] : undefined}
                             alt={`Room Image ${activeStep + 1}`}
                             sx={{
                                 maxHeight: 400,
@@ -58,6 +69,9 @@ const GetDetailRoom = () => {
                                 padding: 2,
                                 backgroundColor: "#f5f5f5",
                             }}
+                            autoPlay
+                            loop
+                            controls
                         />
                         <MobileStepper
                             variant="dots"
@@ -85,7 +99,7 @@ const GetDetailRoom = () => {
                                     size="small"
                                     onClick={handleBack}
                                     disabled={activeStep === 0}
-                                    sx={{ color: "#1976d2","&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                                    sx={{ color: "#1976d2", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                                 >
                                     <KeyboardArrowLeft />
                                 </Button>
@@ -147,6 +161,16 @@ const GetDetailRoom = () => {
                         </CardContent>
                     </Card>
                 )}
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                    <Link
+                        component="button"
+                        variant="body1"
+                        onClick={() => navigate("/customer/rooms")}
+                        sx={{ display: "block", textAlign: "center", mt: 2, "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                    >
+                        Back to Rooms
+                    </Link>
+                </div>
                 <BookingPopup
                     open={dialogOpen}
                     onClose={() => setDialogOpen(false)}
