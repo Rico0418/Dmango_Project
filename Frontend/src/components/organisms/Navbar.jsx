@@ -11,6 +11,7 @@ import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
+import logo from "../../assets/logo.jpg";
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ const Navbar = () => {
             { label: "Manage Rooms", path: "/admin/manage-rooms" },
             { label: "Manage Bookings", path: "/admin/manage-bookings" },
             { label: "Manage Payments", path: "/admin/manage-payments" },
-            { label: "Manage Suggestion", path: "/admin/manage-suggestion"},
+            { label: "Manage Suggestion", path: "/admin/manage-suggestion" },
         ] : []),
         ...(user?.role === "customer" ? [
             { label: "Rooms", path: "/customer/rooms" },
@@ -103,6 +104,18 @@ const Navbar = () => {
         >
             <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Box display="flex" alignItems="center">
+                    <img
+                        src={logo}
+                        alt="D'mango Residence Logo"
+                        style={{
+                            height: '64px',
+                            marginRight: '20px',
+                            cursor: 'pointer',
+                            transform: 'rotate(90deg)',
+                            borderRadius: '4px'
+                        }}
+                        onClick={() => navigate("/")}
+                    />
                     <TypographyTemplate
                         variant="h6"
                         sx={{ cursor: "pointer", fontWeight: "bold", color: "#fff" }}
@@ -140,9 +153,11 @@ const Navbar = () => {
                                     color="error"
                                     size="small"
                                     onClick={handleLogout}
-                                    sx={{ borderRadius: 2, textTransform: "none", fontWeight: "bold", "&:focus": { outline: "none" },
-                                    "&:focus-visible": { outline: "none" },
-                                    "&:active": { outline: "none" } }}
+                                    sx={{
+                                        borderRadius: 2, textTransform: "none", fontWeight: "bold", "&:focus": { outline: "none" },
+                                        "&:focus-visible": { outline: "none" },
+                                        "&:active": { outline: "none" }
+                                    }}
                                 >
                                     Logout
                                 </Button>
