@@ -6,7 +6,7 @@ import { Box, Button, Container, FormControl, InputLabel, MenuItem, Paper, Selec
 import { toast } from "react-toastify";
 import TablePaymentAdmin from "../../components/organisms/TablePaymentAdmin";
 import { startOfDay } from "date-fns";
-import * as XLSX from "xlsx";
+import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 const ManagePaymentDetail = () => {
     const [rows, setRows] = useState([]);
@@ -250,36 +250,104 @@ const ManagePaymentDetail = () => {
                 }
             );
             const data = response.data;
-            if (!data || !Array.isArray(data)) {
+            if (!data || !Array.isArray(data) || data.length === 0) {
                 toast.info("No payments found for selected month and year");
                 return;
             }
-            if (data.length === 0) {
-                toast.info("No payments found for selected month and year");
-                return;
-            }
-            const mappedData = data.map((payment) => ({
-                ID: payment.id,
-                GuestHouse: payment.guest_house_name,
-                BookingID: payment.booking_id,
-                Amount: payment.amount,
-                Method: payment.method,
-                PaymentStatus: payment.status,
-                PaymentDate: payment.created_at,
-                UserName: payment.booking?.name,
-                UserEmail: payment.booking?.email,
-                RoomNumber: payment.booking?.room_number,
-                BookingStatus: payment.booking?.status,
-                StartDate: payment.booking?.start_date,
-                EndDate: payment.booking?.end_date,
-            }));
-            const worksheet = XLSX.utils.json_to_sheet(mappedData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Monthly Payments");
 
-            const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-            const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-            saveAs(blob, `monthly_payments_${selectedMonth}_${selectedYear}.xlsx`);
+            // Create Excel workbook and worksheet
+            const wb = new Workbook();
+            const ws = wb.addWorksheet("Monthly Payments");
+
+            // Define headers
+            const headers = [
+                "ID",
+                "GuestHouse",
+                "BookingID",
+                "Amount",
+                "Method",
+                "PaymentStatus",
+                "PaymentDate",
+                "UserName",
+                "UserEmail",
+                "RoomNumber",
+                "BookingStatus",
+                "StartDate",
+                "EndDate"
+            ];
+            ws.addRow(headers);
+
+            // Style headers (similar to GetHistoryBooking.jsx)
+            ws.getRow(1).eachCell((cell) => {
+                cell.alignment = { horizontal: "center" };
+                cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FF999999" } // Black lighter 50%, matching GetHistoryBooking.jsx
+                };
+                cell.font = { size: 11, bold: true };
+                cell.border = {
+                    top: { style: "medium" },
+                    left: { style: "medium" },
+                    bottom: { style: "medium" },
+                    right: { style: "medium" }
+                };
+            });
+
+            // Add data rows
+            data.forEach((payment) => {
+                ws.addRow([
+                    payment.id,
+                    payment.guest_house_name,
+                    payment.booking_id,
+                    payment.amount,
+                    payment.method,
+                    payment.status,
+                    payment.created_at.substring(0, 10),
+                    payment.booking?.name || "",
+                    payment.booking?.email || "",
+                    payment.booking?.room_number || "",
+                    payment.booking?.status || "",
+                    payment.booking?.start_date ? new Date(payment.booking.start_date).toLocaleDateString("id-ID") : "",
+                    payment.booking?.end_date ? new Date(payment.booking.end_date).toLocaleDateString("id-ID") : ""
+                ]);
+            });
+
+            // Set column widths (approximating GetHistoryBooking.jsx for consistency)
+            ws.columns = [
+                { width: 10 }, // ID
+                { width: 20 }, // GuestHouse
+                { width: 12 }, // BookingID
+                { width: 15 }, // Amount
+                { width: 15 }, // Method
+                { width: 15 }, // PaymentStatus
+                { width: 15 }, // PaymentDate
+                { width: 20 }, // UserName
+                { width: 25 }, // UserEmail
+                { width: 15 }, // RoomNumber
+                { width: 15 }, // BookingStatus
+                { width: 15 }, // StartDate
+                { width: 15 }  // EndDate
+            ];
+
+            // Add medium borders to data cells (matching GetHistoryBooking.jsx)
+            ws.eachRow((row, rowNumber) => {
+                if (rowNumber > 1) { // Skip header row
+                    row.eachCell((cell) => {
+                        cell.border = {
+                            top: { style: "medium" },
+                            left: { style: "medium" },
+                            bottom: { style: "medium" },
+                            right: { style: "medium" }
+                        };
+                    });
+                }
+            });
+
+            // Generate and download Excel file
+            const buffer = await wb.xlsx.writeBuffer();
+            const fileName = `monthly_payments_${selectedMonth}_${selectedYear}.xlsx`;
+            saveAs(new Blob([buffer]), fileName);
         } catch (error) {
             console.error("Error downloading report:", error);
             if (error.response?.status === 404 || error.response?.data?.error === "No payments found") {

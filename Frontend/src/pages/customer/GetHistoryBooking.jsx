@@ -4,9 +4,11 @@ import Navbar from "../../components/organisms/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { Card, CardContent, Typography, Alert, Box, Button } from "@mui/material";
-import * as XLSX from "xlsx";
+import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 import Pagination from "@mui/material/Pagination";
+import logoImage from "../../assets/logo.jpg";
+import signatureImage from "../../assets/signature.png";
 
 const GetHistoryBooking = () => {
     const { user } = useAuth();
@@ -62,51 +64,110 @@ Berikut pesanan saya yang saya sudah buat di web
         return "Terlalu Besar";
     };
 
-    const handleDownloadInvoice = (payment) => {
-        const wb = XLSX.utils.book_new();
-        const wsData = [];
+    const handleDownloadInvoice = async (payment) => {
+        const wb = new Workbook();
+        const ws = wb.addWorksheet("Invoice");
+
+        const logoBuffer = await fetch(logoImage).then(res => res.arrayBuffer());
+        const signatureBuffer = await fetch(signatureImage).then(res => res.arrayBuffer());
+
+        const logoImageId = wb.addImage({
+            buffer: logoBuffer,
+            extension: "jpg",
+        });
+        ws.addImage(logoImageId, {
+            tl: { col: 0, row: 1 },
+            br: { col: 1, row: 17 },
+            ext: { width: 101, height: 295 }, 
+            editAs: "absolute"
+        });
+
+
+        const signatureImageId = wb.addImage({
+            buffer: signatureBuffer,
+            extension: "png",
+        });
+        ws.addImage(signatureImageId, {
+            tl: { col: 3, row: 13 },
+            br: { col: 4, row: 16 },
+            ext: { width: 83, height: 54 }, 
+            editAs: "absolute"
+        });
+
 
         const invoiceNo = `001-2/${new Date(payment.booking.start_date).toLocaleString("default", { month: "short" }).toUpperCase()}/01/${new Date(payment.booking.start_date).getFullYear()}`;
-        wsData.push([{ t: "s", v: "No :" }, { t: "s", v: invoiceNo }, {}, {}, {}]);
-        wsData.push([{ t: "s", v: "Telah terima dari :" }, { t: "s", v: payment.booking.name }, {}, {}, {}]);
-        wsData.push([{ t: "s", v: "Uang sejumlah :" }, { t: "s", v: numberToWords(payment.amount) + " Rupiah" }, {}, {}, {}]);
-        wsData.push([{ t: "s", v: "Untuk pembayaran :" }, { t: "s", v: "" }, {}, {}, {}]);
-
-        wsData.push([{ t: "s", v: "Keterangan" }, {}, {}, {}, {}]);
-        wsData.push([{ t: "s", v: "Uang Jaminan Kamar Kost" }, {}, {}, {}, {}]);
-        wsData.push([{ t: "s", v: "V" }, { t: "s", v: "Sewa Kost" }, {}, {}, { t: "n", v: payment.amount, s: { numFmt: "Rp #,##0" } }]);
-        wsData.push([{ t: "s", v: "-" }, { t: "s", v: "Periode" }, { t: "s", v: `${new Date(payment.booking.start_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")} - ${new Date(payment.booking.end_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}` }, {}, {}]);
-        wsData.push([{ t: "s", v: "-" }, { t: "s", v: "Kamar No." }, { t: "s", v: `#${payment.booking.room_number.trim()}` }, {}, {}]);
-
-        wsData.push([{}, {}, {}, {}, {}]);
-
-        wsData.push([{ t: "s", v: "Total" }, {t: "s", v: "Rp"},{}, { t: "n", v: payment.amount, s: { numFmt: "Rp #,##0", alignment: { horizontal: "right" } } }]);
-        wsData.push([{}, {}, {}, { t: "s", v: `Semarang, ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}` }, {}]);
-        wsData.push([{}, {}, {}, { t: "s", v: "" }, {}]); // Placeholder for signature
-
-        // Create worksheet
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        ws.getCell("B2").value = "No :";
+        ws.getCell("C2").value = invoiceNo;
+        ws.getCell("B3").value = "Telah terima dari :";
+        ws.getCell("C3").value = payment.booking.name;
+        ws.getCell("B4").value = "Uang sejumlah :";
+        ws.getCell("C4").value = numberToWords(payment.amount) + " Rupiah";
+        ws.getCell("B5").value = "Untuk pembayaran :";
 
 
-        ws["!merges"] = [
-            { s: { r: 0, c: 1 }, e: { r: 0, c: 4 } }, // No
-            { s: { r: 1, c: 1 }, e: { r: 1, c: 4 } }, // Telah terima dari
-            { s: { r: 2, c: 1 }, e: { r: 2, c: 4 } }, // Uang sejumlah
-            { s: { r: 3, c: 1 }, e: { r: 3, c: 4 } }, // Untuk pembayaran
-            { s: { r: 5, c: 1 }, e: { r: 5, c: 4 } }, // Uang Jaminan Kamar Kost
-            { s: { r: 9, c: 1 }, e: { r: 9, c: 4 } }, // Rp total
-        ];
+        ws.getCell("B7").value = "Keterangan";
+        ws.getCell("C7").value = "Harga";
+        ws.getCell("D7").value = "Discount";
+        ws.getCell("E7").value = "Netto";
+        ws.getCell("B8").value = "Uang Jaminan Kamar Kost";
+        ws.getCell("B9").value = "V";
+        ws.getCell("C9").value = "Sewa Kost";
+        ws.getCell("E9").value = { formula: `Rp ${payment.amount.toLocaleString()}`, result: payment.amount };
+        ws.getCell("B10").value = "-";
+        ws.getCell("C10").value = "Periode";
+        ws.mergeCells("D10:E10");
+        ws.getCell("D10").value = `${new Date(payment.booking.start_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")} - ${new Date(payment.booking.end_date).toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}`;
+        ws.getCell("B11").value = "-";
+        ws.getCell("C11").value = "Kamar No.";
+        ws.mergeCells("D11:E11");
+        ws.getCell("D11").value = `#${payment.booking.room_number.trim()}`;
 
-        // Set column widths
-        ws["!cols"] = [{ wch: 15 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 10 }];
 
-        // Add worksheet to workbook
-        XLSX.utils.book_append_sheet(wb, ws, "Invoice");
+        ws.getCell("B12").value = "";
 
-        const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
+        ws.getCell("B13").value = "Total";
+        ws.getCell("C13").value = "Rp";
+        ws.getCell("E13").value = { formula: `Rp ${payment.amount.toLocaleString()}`, result: payment.amount };
+        ws.mergeCells("D17:E17");
+        ws.getCell("D17").value = `Semarang, ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}`;
+
+
+        ws.getColumn(1).width = 14.45; 
+        ws.getColumn(2).width = 24.36; 
+        ws.getColumn(3).width = 40.09; 
+        ws.getColumn(4).width = 14.36; 
+        ws.getColumn(5).width = 9.36;  
+
+
+        const headerCells = ["B7", "C7", "D7", "E7"];
+        headerCells.forEach(cell => {
+            ws.getCell(cell).alignment = { horizontal: "center" };
+            ws.getCell(cell).fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FF999999" } 
+            };
+            ws.getCell(cell).font = { size: 11 }; 
+        });
+
+        // Add borders to A2:E17
+        for (let row = 2; row <= 17; row++) {
+            for (let col = 1; col <= 5; col++) {
+                const cell = ws.getCell(row, col);
+                cell.border = {
+                    top: { style: "medium" },
+                    left: { style: "medium" },
+                    bottom: { style: "medium" },
+                    right: { style: "medium" }
+                };
+            }
+        }
+
+
+        const buffer = await wb.xlsx.writeBuffer();
         const fileName = `Invoice_Booking_${payment.booking.name}_${new Date().toISOString().split("T")[0]}.xlsx`;
-        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(blob, fileName);
+        saveAs(new Blob([buffer]), fileName);
     }
     return (
         <div>
