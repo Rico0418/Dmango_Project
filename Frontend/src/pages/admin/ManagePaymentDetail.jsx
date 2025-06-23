@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../../components/organisms/Navbar";
 import Footer from "../../components/organisms/Footer";
-import { Box, Button, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
+import { Box, Button, Container, FormControl, InputLabel, MenuItem, Paper, Select, Typography,Dialog,DialogTitle,DialogContent,DialogActions } from "@mui/material";
 import { toast } from "react-toastify";
 import TablePaymentAdmin from "../../components/organisms/TablePaymentAdmin";
 import { startOfDay } from "date-fns";
@@ -13,6 +13,9 @@ const ManagePaymentDetail = () => {
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
     const [selectedMonth, setSelectedMonth] = useState("");
     const [selectedYear, setSelectedYear] = useState("");
+    const [openEditModal, setOpenEditModal] = useState(false);
+    const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+    const [newPaymentMethod, setNewPaymentMethod] = useState("");
     const fetchData = async () => {
         try {
             const token = sessionStorage.getItem("token");
@@ -90,6 +93,11 @@ const ManagePaymentDetail = () => {
                         label: "Delete",
                         color: "error",
                         onClick: () => handleDelete(payment.id),
+                    },
+                    {
+                        label: "Edit Payment Method",
+                        color: "primary",
+                        onClick: () => handleEditPaymentMethod(payment.id, payment.method),
                     }
                 );
             } else if (status === "pending" || status === "canceled") {
@@ -103,6 +111,11 @@ const ManagePaymentDetail = () => {
                         label: "Delete",
                         color: "error",
                         onClick: () => handleDelete(payment.id),
+                    },
+                    {
+                        label: "Edit Payment Method",
+                        color: "primary",
+                        onClick: () => handleEditPaymentMethod(payment.id, payment.method),
                     }
                 );
             }
@@ -197,6 +210,51 @@ const ManagePaymentDetail = () => {
             toast.error("Failed to accept payment");
         }
     };
+
+    const handleEditPaymentMethod = (paymentId, currentMethod) => {
+        setSelectedPaymentId(paymentId);
+        setNewPaymentMethod(currentMethod || "");
+        setOpenEditModal(true);
+    }
+    const handleSavePaymentMethod = async () => {
+        if (!newPaymentMethod) {
+            toast.error("Please select a payment method");
+            return;
+        }
+        try {
+            const token = sessionStorage.getItem("token");
+            await axios.patch(
+                `${import.meta.env.VITE_API_URL}/payments-method/${selectedPaymentId}`,
+                { method: newPaymentMethod },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+            toast.success("Payment method updated");
+            setRows((prev) =>
+                prev.map((row) =>
+                    row.id === selectedPaymentId
+                        ? { ...row, method: newPaymentMethod, actions: getDynamicActions({ ...row, method: newPaymentMethod }) }
+                        : row
+                )
+            );
+            setOpenEditModal(false);
+            setNewPaymentMethod("");
+            setSelectedPaymentId(null);
+            fetchData();
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to update payment method");
+        }
+    };
+
+    const handleCloseModal = () => {
+        setOpenEditModal(false);
+        setNewPaymentMethod("");
+        setSelectedPaymentId(null);
+    }
 
     const handleCancel = async (id) => {
         try {
@@ -370,7 +428,7 @@ const ManagePaymentDetail = () => {
                     >
                         Payment Detail
                     </Typography>
-                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2,"&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+                    <Button onClick={() => handleSort("id")} variant="contained" sx={{ marginRight: 2, "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
                         Sort by ID {sortConfig.key === "id" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
                     </Button>
                     <Button onClick={() => handleSort("status")} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
@@ -474,6 +532,40 @@ const ManagePaymentDetail = () => {
                     </Box>
                 </Paper>
             </Container>
+            <Dialog open={openEditModal} onClose={handleCloseModal}>
+                <DialogTitle>Edit Payment Method</DialogTitle>
+                <DialogContent>
+                    <FormControl fullWidth sx={{ mt: 2 }}>
+                        <InputLabel id="payment-method-label">Payment Method</InputLabel>
+                        <Select
+                            labelId="payment-method-label"
+                            value={newPaymentMethod}
+                            onChange={(e) => setNewPaymentMethod(e.target.value)}
+                            label="Payment Method"
+                        >
+                            <MenuItem value=""><em>Select payment method</em></MenuItem>
+                            <MenuItem value="Cash">Cash</MenuItem>
+                            <MenuItem value="Virtual Account">Virtual Account</MenuItem>
+                            <MenuItem value="Credit Card">Credit Card</MenuItem>
+                            <MenuItem value="QRIS">QRIS</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseModal} sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSavePaymentMethod}
+                        variant="contained"
+                        color="primary"
+                        disabled={!newPaymentMethod}
+                        sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                    >
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Footer />
         </div>
     );
