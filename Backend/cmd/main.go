@@ -92,6 +92,7 @@ func main(){
 		protected.POST("/payments",h.CreatePayment)
 		protected.DELETE("/payments/:id",h.DeletePayment)
 		protected.PATCH("/payments/:id",h.UpdatePaymentStatus)
+		protected.PATCH("/payments-method/:id",h.UpdatePaymentMethod)
 
 		protected.GET("/suggestion", S.GetAllSuggestion)
 		protected.POST("/suggestion", S.CreateSuggestion)

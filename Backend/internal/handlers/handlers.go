@@ -280,6 +280,31 @@ func (h *Handler) UpdatePaymentStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Payment status updated successfully"})
 }
 
+func (h *Handler) UpdatePaymentMethod(c *gin.Context) {
+	id := c.Param("id")
+	var payment models.Payment
 
+	if err := c.ShouldBindJSON(&payment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := h.DB.Exec(context.Background(), `
+		UPDATE payments 
+		SET method = $1 
+		WHERE id = $2`, payment.Method, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if result.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Payment not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Payment-Method updated successfully"})
+}
 
 
