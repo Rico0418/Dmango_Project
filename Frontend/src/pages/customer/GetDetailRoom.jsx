@@ -51,6 +51,11 @@ const GetDetailRoom = () => {
     const handleBack = () => setActiveStep((prev) => prev - 1);
 
     const isVideo = displayedImages[activeStep] instanceof HTMLVideoElement || /\.(mp4|webm|ogg)$/i.test(displayedImages[activeStep]);
+    const handleWhatsAppRedirect = () => {
+        const PhoneNumber = import.meta.env.VITE_OWNER_PHONE_NUMBER;
+        const url = `https://wa.me/${PhoneNumber}`;
+        window.open(url, '_blank');
+    };
     return (
         <div>
             <Navbar />
@@ -125,7 +130,7 @@ const GetDetailRoom = () => {
                                 <TypographyTemplate variant="body1" sx={{ fontWeight: 500 }}>
                                     <strong>Room Type:</strong> {room.type}
                                 </TypographyTemplate>
-                                {room.type.trim() === "daily" && (
+                                {/* {room.type.trim() === "daily" && (
                                     <TypographyTemplate variant="body1" sx={{ fontWeight: 500 }}>
                                         <strong>Price Per Day:</strong> Rp {room.price_per_day?.toLocaleString() || "N/A"}
                                     </TypographyTemplate>
@@ -134,7 +139,7 @@ const GetDetailRoom = () => {
                                     <TypographyTemplate variant="body1" sx={{ fontWeight: 500 }}>
                                         <strong>Price Per Month:</strong> Rp {room.price_per_month?.toLocaleString() || "N/A"}
                                     </TypographyTemplate>
-                                )}
+                                )} */}
                                 <TypographyTemplate variant="body1" sx={{ fontWeight: 500 }}>
                                     <strong>Facilities:</strong>{" "}
                                     {room.facilities && room.facilities.length > 0
@@ -142,22 +147,43 @@ const GetDetailRoom = () => {
                                         : "None"}
                                 </TypographyTemplate>
                             </Box>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => setDialogOpen(true)}
-                                sx={{
-                                    mt: 4,
-                                    px: 4,
-                                    py: 1.5,
-                                    fontWeight: 600,
-                                    borderRadius: 8,
-                                    textTransform: "none",
-                                    "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" }
-                                }}
-                            >
-                                Book Room
-                            </Button>
+                            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => handleWhatsAppRedirect()}
+                                    sx={{
+                                        mt: 4,
+                                        px: 4,
+                                        py: 1.5,
+                                        fontWeight: 600,
+                                        borderRadius: 8,
+                                        textTransform: "none",
+                                        minWidth: 250,
+                                        "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" }
+                                    }}
+                                >
+                                    Ask More
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setDialogOpen(true)}
+                                    sx={{
+                                        mt: 4,
+                                        px: 4,
+                                        py: 1.5,
+                                        fontWeight: 600,
+                                        borderRadius: 8,
+                                        textTransform: "none",
+                                        minWidth: 250,
+                                        "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" }
+                                    }}
+                                >
+                                    Book Room
+                                </Button>
+                            </div>
+
                         </CardContent>
                     </Card>
                 )}
