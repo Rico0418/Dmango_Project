@@ -98,5 +98,5 @@ func main(){
 		protected.POST("/suggestion", S.CreateSuggestion)
 		protected.DELETE("/suggestion/:id",S.DeleteSuggestion)
 	}
-	r.Run(":8080")
+	r.Run(":8081")
 }
