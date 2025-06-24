@@ -58,7 +58,7 @@ const ContactPage = () => {
     return (
         <>
             <Navbar />
-           <main style={{ minHeight: "90vh", display: "flex", alignItems: "center", flexDirection: "column", justifyContent: "center" }}>
+           <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", flexDirection: "column", justifyContent: "center" }}>
                 <Contact />
                 <Box sx={{ mt: 4, textAlign: 'center', width: '100%' }}>
                     <Typography variant="body1">

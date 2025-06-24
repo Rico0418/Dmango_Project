@@ -52,12 +52,12 @@ const HomePage = () => {
             }}
           >
             <Typography variant="h3" fontWeight="bold" gutterBottom>
-              Welcome to Dmango Residences
+              Welcome to D'Mango Residences
             </Typography>
 
             <Typography variant="body1" sx={{ maxWidth: "600px", marginBottom: "20px" }}>
-              Dmango Residence offers premium accommodation services with comfortable, affordable, and
-              modern living spaces. Explore our residences below.
+              D'Mango Residence offers premium accommodation services with comfortable, affordable, and
+              modern living spaces. Explore our residences below. Spacious monthly and daily rental room with toilet, television, and AC.
             </Typography>
 
             <Tabs value={activeTab} onChange={handleTabChange} centered>

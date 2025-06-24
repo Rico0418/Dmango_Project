@@ -59,7 +59,7 @@ const GetDetailRoom = () => {
     return (
         <div>
             <Navbar />
-            <Container maxWidth="md" sx={{ mt: 8, mb: 8, minHeight: "70vh" }}>
+            <Container maxWidth="md" sx={{ mt: 8, mb: 8, minHeight: "80vh" }}>
                 {room && (
                     <Card sx={{ boxShadow: 4, borderRadius: 2, overflow: "hidden" }}>
                         <CardMedia

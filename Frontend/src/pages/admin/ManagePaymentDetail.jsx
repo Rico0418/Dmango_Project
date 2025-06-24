@@ -8,6 +8,7 @@ import TablePaymentAdmin from "../../components/organisms/TablePaymentAdmin";
 import { startOfDay } from "date-fns";
 import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
+import LoadingScreen from "../../utils/LoadingScreen";
 const ManagePaymentDetail = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
@@ -16,8 +17,10 @@ const ManagePaymentDetail = () => {
     const [openEditModal, setOpenEditModal] = useState(false);
     const [selectedPaymentId, setSelectedPaymentId] = useState(null);
     const [newPaymentMethod, setNewPaymentMethod] = useState("");
+    const [loading, setLoading] = useState(true);
     const fetchData = async () => {
         try {
+            setLoading(true);
             const token = sessionStorage.getItem("token");
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/payments`, {
                 headers: {
@@ -43,11 +46,14 @@ const ManagePaymentDetail = () => {
             console.log("Formatted Rows: ", formattedRows);
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading (false)
         }
     };
     useEffect(() => {
         fetchData();
     }, []);
+    
     const getDynamicActions = (payment) => {
         let actions = [];
         const status = payment.status.trim().toLowerCase();
@@ -415,10 +421,11 @@ const ManagePaymentDetail = () => {
             }
         }
     };
+    if (loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "60vh" }}>
+            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "100%", flex:1 }}>
                 <Paper sx={{ p: 3, boxShadow: 3 }}>
                     <Typography
                         variant="h2"

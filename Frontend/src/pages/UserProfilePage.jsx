@@ -6,7 +6,7 @@ const UserProfilePage = () => {
     return (
         <>
             <Navbar />
-                <main style={{ minHeight: "90vh", display: "flex", alignItems: "center" }}>
+                <main style={{ minHeight: "100%", display: "flex", alignItems: "center",flex: 1 }}>
                     <UserProfile />
                 </main>
             <Footer />

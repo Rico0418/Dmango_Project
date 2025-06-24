@@ -5,16 +5,19 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import LoadingScreen from "../../utils/LoadingScreen";
 const UpdateRoomForm = () => {
     const [pricePerDay, setPricePerDay] = useState("");
     const [pricePerMonth, setPricePerMonth] = useState("");
     const [status, setStatus] = useState("");
     const [facilities, setFacilities] = useState("");
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { id } = useParams();
     useEffect(() => {
         const fetchRoomData = async () => {
             try {
+                setLoading(true);
                 const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -27,6 +30,8 @@ const UpdateRoomForm = () => {
             } catch (error) {
                 toast.error("Failed to load room data");
                 console.error(error);
+            } finally {
+                setLoading (false);
             }
         }
         fetchRoomData();
@@ -54,6 +59,7 @@ const UpdateRoomForm = () => {
             console.error(error);
         }
     };
+    if(loading) return <LoadingScreen />;
     return (
         <Container maxWidth="xs">
             <Box

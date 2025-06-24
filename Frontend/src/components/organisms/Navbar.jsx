@@ -106,7 +106,7 @@ const Navbar = () => {
                 <Box display="flex" alignItems="center">
                     <img
                         src={logo}
-                        alt="D'mango Residence Logo"
+                        alt="D'Mango Residence Logo"
                         style={{
                             height: '64px',
                             marginRight: '20px',
@@ -121,7 +121,7 @@ const Navbar = () => {
                         sx={{ cursor: "pointer", fontWeight: "bold", color: "#fff" }}
                         onClick={() => navigate("/")}
                     >
-                        D'mango Residence
+                        D'Mango Residence
                     </TypographyTemplate>
                 </Box>
 

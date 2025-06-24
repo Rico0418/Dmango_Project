@@ -1,6 +1,6 @@
 import { lazy } from "react"
 
-export const LazyWithTimeout = (importFunc, timeout = 3000) => {
+export const LazyWithTimeout = (importFunc, timeout = 10000) => {
     return lazy(()=>
         Promise.race([
             importFunc(),

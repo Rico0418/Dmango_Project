@@ -9,6 +9,7 @@ import { saveAs } from "file-saver";
 import Pagination from "@mui/material/Pagination";
 import logoImage from "../../assets/logo.jpg";
 import signatureImage from "../../assets/signature.png";
+import LoadingScreen from "../../utils/LoadingScreen";
 
 const GetHistoryBooking = () => {
     const { user } = useAuth();
@@ -20,6 +21,7 @@ const GetHistoryBooking = () => {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = payments.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(payments.length / itemsPerPage);
+    const [loading, setLoading] = useState(true);
     const handleChangePage = (event, value) => {
         setCurrentPage(value);
     }
@@ -27,6 +29,7 @@ const GetHistoryBooking = () => {
     useEffect(() => {
         const fetchPayments = async () => {
             try {
+                setLoading(true);
                 const token = sessionStorage.getItem("token");
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -34,6 +37,8 @@ const GetHistoryBooking = () => {
                 setPayments(Array.isArray(res.data) ? res.data : []);
             } catch (err) {
                 setError("Failed to fetch booking history");
+            }finally{
+                setLoading(false);
             }
         };
         fetchPayments();
@@ -169,10 +174,11 @@ Berikut pesanan saya yang saya sudah buat di web
         const fileName = `Invoice_Booking_${payment.booking.name}_${new Date().toISOString().split("T")[0]}.xlsx`;
         saveAs(new Blob([buffer]), fileName);
     }
+    if(loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <div style={{ padding: "2rem", minHeight: "80vh" }}>
+            <div style={{ padding: "2rem", minHeight: "90vh" }}>
                 <Typography variant="h4" gutterBottom>
                     Booking History
                 </Typography>

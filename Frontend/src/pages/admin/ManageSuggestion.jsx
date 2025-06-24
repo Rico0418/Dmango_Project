@@ -7,12 +7,15 @@ import { useNavigate } from "react-router-dom";
 import TableComplaintAdmin from "../../components/organisms/TableComplaintAdmin";
 import { toast } from "react-toastify";
 import TableSuggestionAdmin from "../../components/organisms/TableSuggestionAdmin";
+import LoadingScreen from "../../utils/LoadingScreen";
 const ManageComplaints = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
                 const token = sessionStorage.getItem("token");
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/suggestion`, {
                     headers: {
@@ -29,6 +32,8 @@ const ManageComplaints = () => {
                 console.log("Formatted Rows: ", formattedRows);
             } catch (error) {
                 console.error(error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -68,10 +73,11 @@ const ManageComplaints = () => {
             console.error(error);
         }
     };
+    if (loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "60vh" }}>
+            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "90vh",flex:1 }}>
                 <Paper sx={{ p: 3, boxShadow: 3 }}>
                     <Typography
                         variant="h2"

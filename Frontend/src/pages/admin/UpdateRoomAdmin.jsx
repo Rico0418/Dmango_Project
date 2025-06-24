@@ -6,7 +6,7 @@ const UpdateRoomAdmin = () => {
     return (
         <div>
             <Navbar />
-            <main style={{  minHeight: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <main style={{  minHeight: "90vh", flex:1, display: "flex", justifyContent: "center", alignItems: "center" }}>
                 <UpdateRoomForm />
             </main>
             <Footer />

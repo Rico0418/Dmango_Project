@@ -7,6 +7,7 @@ import axios from "axios";
 import CreateComplaintDialog from "../../components/organisms/CreateComplaintForm";
 import { toast } from "react-toastify";
 import EditComplaintForm from "../../components/organisms/EditComplaintForm";
+import LoadingScreen from "../../utils/LoadingScreen";
 const ComplaintRoom = () => {
     const { user } = useAuth();
     const [tabIndex, setTabIndex] = useState(0);
@@ -16,6 +17,7 @@ const ComplaintRoom = () => {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [selectedComplaint, setSelectedComplaint] = useState(null);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const [loading,setLoading] = useState(true);
     const today = new Date();
 
     const fetchComplaints = async () => {
@@ -34,6 +36,7 @@ const ComplaintRoom = () => {
         if (!user || !user.id) return;
         const fetchPayments = async () => {
             try {
+                setLoading(true);
                 const token = sessionStorage.getItem("token");
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/payments/user/${user.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -44,6 +47,8 @@ const ComplaintRoom = () => {
                 setPayments(acceptedPayments);
             } catch (err) {
                 setError("Failed to fetch booking history");
+            }finally{
+                setLoading(false);
             }
         };
         fetchPayments();
@@ -84,11 +89,11 @@ const ComplaintRoom = () => {
             toast.error("Update complaint failed");
         }
     };
-
+    if(loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <div style={{ padding: "2rem", minHeight: "75vh" }}>
+            <div style={{ padding: "2rem", minHeight: "90vh" }}>
                 <Tabs value={tabIndex} onChange={handleTabChange} centered>
                     <Tab label="My Booked Rooms" sx={{ "&:focus": { outline: "none" } }} />
                     <Tab label="My Complaints" sx={{ "&:focus": { outline: "none" } }} />

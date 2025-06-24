@@ -5,12 +5,14 @@ import Footer from "../../components/organisms/Footer";
 import { Box, Container, FormControl, InputLabel, MenuItem, Paper, Select, Tab, Tabs } from "@mui/material";
 import TypographyTemplate from "../../components/molecules/Typography";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "../../utils/LoadingScreen";
 
 const GetAllRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [floor, setFloor] = useState(0);
     const [guestHouses, setGuestHouses] = useState([]);
     const [selectedGH, setSelectedGH] = useState("");
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     useEffect(() => {
         const fetchGuestHouses = async () => {
@@ -33,6 +35,7 @@ const GetAllRoom = () => {
         if(!selectedGH) return;
         const fetchData = async () => {
             try {
+                setLoading(true);
                 const token = sessionStorage.getItem("token");
                 console.log(token);
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/rooms?guest_house_id=${selectedGH}`, {
@@ -44,6 +47,8 @@ const GetAllRoom = () => {
                 setRooms(sortedRooms);
             } catch (error) {
                 console.error(error);
+            }finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -74,10 +79,11 @@ const GetAllRoom = () => {
             ))}
         </Box>
     );
+    if (loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "60vh" }}>
+            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "75vh" }}>
                 <TypographyTemplate variant="h4" gutterBottom>
                     Available Room List
                 </TypographyTemplate>

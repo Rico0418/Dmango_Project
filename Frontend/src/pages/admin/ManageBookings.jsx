@@ -6,13 +6,16 @@ import { Box, Button, Container, Paper, Typography, TextField } from "@mui/mater
 import { toast } from "react-toastify";
 import TableBookingAdmin from "../../components/organisms/TableBookingAdmin";
 import CreateBookingAdmin from "../../components/organisms/CreateBookingAdmin";
+import LoadingScreen from "../../utils/LoadingScreen";
 const ManageBookings = () => {
     const [rows, setRows] = useState([]);
     const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
     const [openCreateDialog, setOpenCreateDialog] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(true);
     const fetchData = async () => {
         try {
+            setLoading(true);
             const token = sessionStorage.getItem("token");
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/bookings`, {
                 headers: {
@@ -34,6 +37,8 @@ const ManageBookings = () => {
             console.log("Formatted Rows: ", formattedRows);
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading (false);
         }
     };
     useEffect(() => {
@@ -90,10 +95,11 @@ const ManageBookings = () => {
     const handleBookingCreated = () => {
         fetchData();
     };
+    if (loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
-            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "60vh" }}>
+            <Container maxWidth="xl" sx={{ mt: 10, mb: 10, minHeight: "90vh" }}>
                 <Paper sx={{ p: 3, boxShadow: 3 }}>
                     <Typography
                         variant="h2"

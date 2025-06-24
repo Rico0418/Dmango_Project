@@ -3,6 +3,10 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  color: #000000; /* Reinforce black text */
+  min-height: 100%; /* Ensure full height */
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
