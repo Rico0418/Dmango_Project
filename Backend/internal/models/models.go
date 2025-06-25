@@ -72,3 +72,13 @@ type Suggestion struct {
 	Description string    `json:"description"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+type Review struct {
+	ID        int       `json:"id"`
+	BookingID int       `json:"booking_id"`
+	GuestName string    `json:"guest_name"`
+	Rating    int       `json:"rating"`
+	Comment   string    `json:"comment"`
+	RoomNumber string `json:"room_number"`
+	GuestHouseName string `json:"guest_house_name"`
+	CreatedAt time.Time `json:"created_at"`
+}

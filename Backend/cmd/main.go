@@ -19,6 +19,7 @@ func main(){
 	Bh := &handlers.BookingHandler{DB: config.DB}
 	Gh := &handlers.GuestHouseHandler{DB: config.DB}
 	S  := &handlers.SuggestionHandler{DB: config.DB}
+	Re := &handlers.ReviewHandler{DB: config.DB}
 	r := gin.Default()
 
 	loc, err := time.LoadLocation("Asia/Jakarta")
@@ -97,6 +98,11 @@ func main(){
 		protected.GET("/suggestion", S.GetAllSuggestion)
 		protected.POST("/suggestion", S.CreateSuggestion)
 		protected.DELETE("/suggestion/:id",S.DeleteSuggestion)
+
+		protected.GET("/reviews", Re.GetAllReviews)
+		protected.POST("/reviews", Re.CreateReview)
+		protected.PUT("/reviews/:id", Re.UpdateReview)
+		protected.DELETE("/reviews/:id", Re.DeleteReview)
 	}
 	r.Run(":8081")
 }
