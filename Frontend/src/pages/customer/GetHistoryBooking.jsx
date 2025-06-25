@@ -3,19 +3,24 @@ import Footer from "../../components/organisms/Footer";
 import Navbar from "../../components/organisms/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { Card, CardContent, Typography, Alert, Box, Button } from "@mui/material";
+import { Card, CardContent, Typography, Alert, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Rating } from "@mui/material";
 import { Workbook } from "exceljs";
 import { saveAs } from "file-saver";
 import Pagination from "@mui/material/Pagination";
 import logoImage from "../../assets/logo.jpg";
 import signatureImage from "../../assets/signature.png";
 import LoadingScreen from "../../utils/LoadingScreen";
+import { toast } from "react-toastify";
 
 const GetHistoryBooking = () => {
     const { user } = useAuth();
     const [payments, setPayments] = useState([]);
-    const [error, setError] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [openReviewDialog, setOpenReviewDialog] = useState(false);
+    const [selectedBookingId, setSelectedBookingId] = useState(null);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState("");
+    const [reviewedBookings, setReviewedBookings] = useState(new Set());
     const itemsPerPage = 2;
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -35,14 +40,21 @@ const GetHistoryBooking = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setPayments(Array.isArray(res.data) ? res.data : []);
+                const reviewsRes = await axios.get(`${import.meta.env.VITE_API_URL}/reviews`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const temp = (Array.isArray(reviewsRes.data) ? res.data : []);
+                const reviewedBookingIds = new Set(temp.map((review) => review.booking_id));
+                setReviewedBookings(reviewedBookingIds);
             } catch (err) {
-                setError("Failed to fetch booking history");
-            }finally{
+                toast.error("Failed to fetch booking history");
+            } finally {
                 setLoading(false);
             }
         };
         fetchPayments();
     }, [user.id]);
+    console.log(payments);
     const handleWhatsAppRedirect = (payment) => {
         const PhoneNumber = import.meta.env.VITE_OWNER_PHONE_NUMBER;
         const message = `Order D'mango Detail:\nBooking ID: ${payment.booking.id}\nName: ${payment.booking.name}\nEmail: ${payment.booking.email}\nRoom Number: ${payment.booking.room_number.trim()}\nStart-date: ${new Date(payment.booking.start_date).toLocaleDateString()}\nEnd-date: ${new Date(payment.booking.end_date).toLocaleDateString()}\nAmount: Rp ${payment.amount.toLocaleString()}\n 
@@ -83,7 +95,7 @@ Berikut pesanan saya yang saya sudah buat di web
         ws.addImage(logoImageId, {
             tl: { col: 0, row: 1 },
             br: { col: 1, row: 17 },
-            ext: { width: 101, height: 295 }, 
+            ext: { width: 101, height: 295 },
             editAs: "absolute"
         });
 
@@ -95,7 +107,7 @@ Berikut pesanan saya yang saya sudah buat di web
         ws.addImage(signatureImageId, {
             tl: { col: 3, row: 13 },
             br: { col: 4, row: 16 },
-            ext: { width: 83, height: 54 }, 
+            ext: { width: 83, height: 54 },
             editAs: "absolute"
         });
 
@@ -138,11 +150,11 @@ Berikut pesanan saya yang saya sudah buat di web
         ws.getCell("D17").value = `Semarang, ${new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/-/g, " / ")}`;
 
 
-        ws.getColumn(1).width = 14.45; 
-        ws.getColumn(2).width = 24.36; 
-        ws.getColumn(3).width = 40.09; 
-        ws.getColumn(4).width = 14.36; 
-        ws.getColumn(5).width = 9.36;  
+        ws.getColumn(1).width = 14.45;
+        ws.getColumn(2).width = 24.36;
+        ws.getColumn(3).width = 40.09;
+        ws.getColumn(4).width = 14.36;
+        ws.getColumn(5).width = 9.36;
 
 
         const headerCells = ["B7", "C7", "D7", "E7"];
@@ -151,9 +163,9 @@ Berikut pesanan saya yang saya sudah buat di web
             ws.getCell(cell).fill = {
                 type: "pattern",
                 pattern: "solid",
-                fgColor: { argb: "FF999999" } 
+                fgColor: { argb: "FF999999" }
             };
-            ws.getCell(cell).font = { size: 11 }; 
+            ws.getCell(cell).font = { size: 11 };
         });
 
         // Add borders to A2:E17
@@ -174,7 +186,54 @@ Berikut pesanan saya yang saya sudah buat di web
         const fileName = `Invoice_Booking_${payment.booking.name}_${new Date().toISOString().split("T")[0]}.xlsx`;
         saveAs(new Blob([buffer]), fileName);
     }
-    if(loading) return <LoadingScreen />;
+    const handleOpenReviewDialog = (bookingId) => {
+        setSelectedBookingId(bookingId);
+        setReviewRating(0);
+        setReviewComment("");
+        setOpenReviewDialog(true);
+    }
+    const handleCloseReviewDialog = () => {
+        setOpenReviewDialog(false);
+        setSelectedBookingId(null);
+    }
+    const handleSubmitReview = async () => {
+        if (!reviewRating || !reviewComment.trim()) {
+            toast.error("Please provide a rating and comment");
+            return;
+        }
+        const payment = payments.find(p => p.booking.id === selectedBookingId);
+        if (!payment) {
+            toast.error("Payment data not found for this booking");
+            return;
+        }
+        try {
+            const token = sessionStorage.getItem("token");
+            await axios.post(
+                `${import.meta.env.VITE_API_URL}/reviews`,
+                {
+                    booking_id: selectedBookingId,
+                    guest_name: payment.booking.name,
+                    rating: reviewRating,
+                    comment: reviewComment,
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+            toast.success("Review submitted successfully");
+            setReviewedBookings((prev) => new Set([...prev, selectedBookingId]));
+            handleCloseReviewDialog();
+        } catch (err) {
+            toast.error("Failed to submit review");
+            console.error(err);
+        }
+    };
+    const isReviewEligible = (payment) => {
+        return (
+            payment.status.trim().toLowerCase() === "accepted" && new Date(payment.booking.end_date) <= new Date()
+        )
+    }
+    if (loading) return <LoadingScreen />;
     return (
         <div>
             <Navbar />
@@ -182,7 +241,6 @@ Berikut pesanan saya yang saya sudah buat di web
                 <Typography variant="h4" gutterBottom>
                     Booking History
                 </Typography>
-                {error && <Alert severity="error">{error}</Alert>}
                 {payments.length === 0 ? (
                     <Typography>No bookings found.</Typography>
                 ) : (
@@ -236,11 +294,30 @@ Berikut pesanan saya yang saya sudah buat di web
                                                 color="primary"
                                                 size="small"
                                                 onClick={() => handleDownloadInvoice(payment)}
-                                                sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
+                                                sx={{ textTransform: "none", "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" , minWidth: "300px"} }}
                                             >
                                                 Download Invoice
                                             </Button>
                                         </Box>
+                                    )}
+                                    {isReviewEligible(payment) && (
+                                        <Box sx={{ padding: 1 }}>
+                                            <Button
+                                                variant="contained"
+                                                color="info"
+                                                size="small"
+                                                onClick={() => handleOpenReviewDialog(payment.booking.id)}
+                                                sx={{
+                                                    textTransform: "none",
+                                                    "&:focus": { outline: "none", boxShadow: "none" },
+                                                    "&:active": { outline: "none", boxShadow: "none" },
+                                                    minWidth: "130px"
+                                                }}
+                                            >
+                                                Write Review
+                                            </Button>
+                                        </Box>
+
                                     )}
                                 </CardContent>
                             </Card>
@@ -258,6 +335,54 @@ Berikut pesanan saya yang saya sudah buat di web
                     </div>
                 )}
             </div>
+            <Dialog open={openReviewDialog} onClose={handleCloseReviewDialog}>
+                <DialogTitle>Write a Review</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body1" gutterBottom>
+                            Rating
+                        </Typography>
+                        <Rating
+                            value={reviewRating}
+                            onChange={(event, newValue) => setReviewRating(newValue)}
+                            size="large"
+                        />
+                    </Box>
+                    <TextField
+                        label="Comment"
+                        multiline
+                        rows={4}
+                        fullWidth
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        variant="outlined"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        onClick={handleCloseReviewDialog}
+                        sx={{
+                            textTransform: "none",
+                            "&:focus": { outline: "none", boxShadow: "none" },
+                            "&:active": { outline: "none", boxShadow: "none" },
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={handleSubmitReview}
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                            textTransform: "none",
+                            "&:focus": { outline: "none", boxShadow: "none" },
+                            "&:active": { outline: "none", boxShadow: "none" },
+                        }}
+                    >
+                        Submit
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Footer />
         </div>
     );

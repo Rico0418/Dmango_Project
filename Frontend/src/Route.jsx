@@ -27,6 +27,7 @@ const BookingHistory = LazyWithTimeout(() => import("./pages/customer/GetHistory
 const RoomList = LazyWithTimeout(() => import("./pages/customer/GetAllRoom"));
 const RoomDetail = LazyWithTimeout(() => import("./pages/customer/GetDetailRoom"));
 const ComplaintRoom = LazyWithTimeout(() => import("./pages/customer/ComplaintRoom"));
+const Review = LazyWithTimeout(()=>import("./pages/ReviewsPage"));
 
 
 const routesConfig = [
@@ -37,6 +38,7 @@ const routesConfig = [
   { path: "/", element: Home, protected: true },
   { path: "/user/profile/:id", element: UserProfile, protected: true},
   { path: "/contact", element: Contact, protected: true},
+  { path: "/view-reviews", element: Review, protected: true},
 
   // // Admin Routes (only accessible by admin)
   { path: "/admin/manage-complaints", element: ManageComplaints, role: "admin", protected: true },

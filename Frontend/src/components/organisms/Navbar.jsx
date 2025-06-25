@@ -28,6 +28,7 @@ const Navbar = () => {
 
     const navItems = [
         { label: "Home", path: "/" },
+        { label: "Reviews", path: "/view-reviews"},
         ...(user?.role === "admin" ? [
             { label: "Manage Complaints", path: "/admin/manage-complaints" },
             { label: "Manage Rooms", path: "/admin/manage-rooms" },
