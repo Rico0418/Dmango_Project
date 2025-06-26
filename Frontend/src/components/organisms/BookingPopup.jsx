@@ -24,6 +24,7 @@ const BookingPopup = ({ open, onClose, room }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [bookedRanges, setBookedRanges] = useState([]);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
   useEffect(() => {
     const fetchBookedDates = async () => {
@@ -78,7 +79,7 @@ const BookingPopup = ({ open, onClose, room }) => {
         (end.getFullYear() - start.getFullYear()) * 12 +
         (end.getMonth() - start.getMonth());
       duration = duration <= 0 ? 1 : duration;
-      return duration * room.price_per_month;
+      return duration * room.price_per_month + 500000;
     }
   };
 
@@ -102,16 +103,16 @@ const BookingPopup = ({ open, onClose, room }) => {
   const shouldDisableDate = (date) => {
     const today = startOfDay(new Date());
     const normalizedDate = startOfDay(new Date());
-    return  isBefore(normalizedDate,today) || isDateBooked(date);
+    return isBefore(normalizedDate, today) || isDateBooked(date);
   }
 
   const hasDateRangeOverlap = (start, end) => {
     const normalizedStart = startOfDay(start);
     const normalizedEnd = startOfDay(end);
     return bookedRanges.some(([bookedStart, bookedEnd]) => {
-        const normalizedBookedStart = startOfDay(bookedStart);
-        const normalizedBookedEnd = startOfDay(bookedEnd);
-        return normalizedStart <= normalizedBookedEnd && normalizedEnd >= normalizedBookedStart;
+      const normalizedBookedStart = startOfDay(bookedStart);
+      const normalizedBookedEnd = startOfDay(bookedEnd);
+      return normalizedStart <= normalizedBookedEnd && normalizedEnd >= normalizedBookedStart;
     });
   };
 
@@ -129,17 +130,17 @@ const BookingPopup = ({ open, onClose, room }) => {
         toast.error("Start date must be before end date");
         return;
       }
-      if(room.type.trim() === "monthly"){
+      if (room.type.trim() === "monthly") {
         const start = new Date(startDate);
         const end = new Date(endDate);
-        const monthDiff = (end.getFullYear() - start.getFullYear())*12
-                          + (end.getMonth() - start.getMonth());
+        const monthDiff = (end.getFullYear() - start.getFullYear()) * 12
+          + (end.getMonth() - start.getMonth());
         if (monthDiff < 1) {
           toast.error("Minimum booking for monthly rooms is 1 month");
           return;
         }
       }
-      if (hasDateRangeOverlap(startDate,endDate)){
+      if (hasDateRangeOverlap(startDate, endDate)) {
         toast.error("Selected date range overlaps with an existing booking");
         return;
       }
@@ -209,42 +210,63 @@ const BookingPopup = ({ open, onClose, room }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Book Room - {room?.room_number}</DialogTitle>
-      <DialogContent>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Typography>Start Date:</Typography>
-          <StaticDatePicker
-            label="Start Date"
-            value={startDate}
-            onChange={(newValue) => setStartDate(newValue)}
-            shouldDisableDate={shouldDisableDate}
-            slots={{ day: renderDayWithTooltip }}
-          />
-          <Typography>End Date:</Typography>
-          <StaticDatePicker
-            label="End Date"
-            value={endDate}
-            onChange={(newValue) => setEndDate(newValue)}
-            shouldDisableDate={shouldDisableDate}
-            slots={{ day: renderDayWithTooltip }}
-          />
-        </LocalizationProvider>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
-          Cancel
-        </Button>
-        <Button onClick={handleBook} variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
-          Confirm Booking
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <>
+      <Dialog open={open} onClose={onClose}>
+        <DialogTitle>Book Room - {room?.room_number}</DialogTitle>
+        <DialogContent>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Typography>Start Date:</Typography>
+            <StaticDatePicker
+              label="Start Date"
+              value={startDate}
+              onChange={(newValue) => setStartDate(newValue)}
+              shouldDisableDate={shouldDisableDate}
+              slots={{ day: renderDayWithTooltip }}
+            />
+            <Typography>End Date:</Typography>
+            <StaticDatePicker
+              label="End Date"
+              value={endDate}
+              onChange={(newValue) => setEndDate(newValue)}
+              shouldDisableDate={shouldDisableDate}
+              slots={{ day: renderDayWithTooltip }}
+            />
+          </LocalizationProvider>
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} color="secondary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+            Cancel
+          </Button>
+          <Button onClick={() => setOpenConfirmDialog(true)} variant="contained" color="primary" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+            Confirm Booking
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openConfirmDialog} onClose={()=>setOpenConfirmDialog(false)} fullWidth>
+        <DialogTitle>Confirm Booking</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure want to book this room ?</Typography>
+          {room?.type?.trim().toLowerCase() === "monthly" && (
+            <Typography>Because you choose room with type monthly you will get charge another Rp 500.000,00 as deposit. <br />
+            Deposit will be returned to you in the end of your stay</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={()=>setOpenConfirmDialog(false)} color="inherit" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+            Cancel
+          </Button>
+          <Button onClick={handleBook} variant="contained" sx={{ "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+
   );
 };
 
