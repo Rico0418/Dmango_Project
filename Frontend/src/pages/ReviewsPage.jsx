@@ -2,10 +2,11 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, Typography, Alert, Box, Rating, Pagination } from "@mui/material";
+import { Card, CardContent, Typography, Alert, Box, Rating, Pagination, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from "@mui/material";
 import LoadingScreen from "../utils/LoadingScreen";
 import Navbar from "../components/organisms/Navbar";
 import Footer from "../components/organisms/Footer";
+import { useAuth } from "../context/AuthContext";
 
 const ReviewsPage = () => {
     const [reviews, setReviews] = useState([]);
@@ -16,6 +17,11 @@ const ReviewsPage = () => {
     const indexOfFirstItem = indexOfLastItem - itemPerPage;
     const currentItems = reviews.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(reviews.length / itemPerPage);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [editingReview, setEditingReview] = useState(null);
+    const [editRating, setEditRating] = useState(0);
+    const [editComment, setEditComment] = useState("");
+    const { user } = useAuth();
     useEffect(() => {
         const fetchReviews = async () => {
             try {
@@ -34,9 +40,74 @@ const ReviewsPage = () => {
         }
         fetchReviews();
     }, []);
+    useEffect(() => {
+        const fetchUsersAndIdentify = async () => {
+            try {
+                setLoading(true);
+                const token = sessionStorage.getItem("token");
+                const usersRes = await axios.get(`${import.meta.env.VITE_API_URL}/users`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const users = Array.isArray(usersRes.data) ? usersRes.data : [];
+                const matchedUser = users.find(u => u.id === user.id);
+                setCurrentUser(matchedUser);
+            } catch (err) {
+                toast.error("Failed to fetch user");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUsersAndIdentify();
+    }, [])
     const handleChangePage = (event, value) => {
         setCurrentPage(value);
     }
+    const handleOpenEdit = (review) => {
+        setEditingReview(review);
+        setEditRating(review.rating);
+        setEditComment(review.comment);
+    }
+    const handleCloseEdit = () => {
+        setEditingReview(null);
+        setEditRating(0);
+        setEditComment("");
+    }
+    const handleSubmitEdit = async () => {
+        if (!editRating || !editComment.trim()) {
+            toast.error("Please provide a rating and comment");
+            return;
+        }
+        try {
+            const token = sessionStorage.getItem("token");
+            await axios.put(`${import.meta.env.VITE_API_URL}/reviews/${editingReview.id}`, {
+                rating: editRating,
+                comment: editComment,
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Review updated");
+            handleCloseEdit();
+            setReviews(prev => prev.map(r => r.id === editingReview.id ? { ...r, rating: editRating, comment: editComment } : r));
+        } catch (err) {
+            toast.error("Failed to update review");
+            console.error(err);
+        }
+    }
+    const handleDelete = async (reviewId) => {
+        if (!window.confirm("Are you sure you want to delete this review?")) return;
+        try {
+            const token = sessionStorage.getItem("token");
+            await axios.delete(`${import.meta.env.VITE_API_URL}/reviews/${reviewId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success("Review deleted");
+            setReviews(prev => prev.filter(r => r.id !== reviewId));
+        } catch (err) {
+            toast.error("Failed to delete review");
+            console.error(err);
+        }
+    };
     const averageRating = reviews.length ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) : 0;
     if (loading) return <LoadingScreen />;
     return (
@@ -113,6 +184,17 @@ const ReviewsPage = () => {
                                         <strong>Guest:</strong> {review.guest_name}
                                     </Typography>
                                     <Typography variant="body1">
+                                        <strong>From:</strong>  {new Date(review.start_date).toLocaleDateString("id-ID", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                        })} <strong> - To: </strong>  {new Date(review.end_date).toLocaleDateString("id-ID", {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                        })}
+                                    </Typography>
+                                    <Typography variant="body1">
                                         <strong>Comment:</strong> {review.comment}
                                     </Typography>
                                     <Typography variant="body1">
@@ -123,6 +205,28 @@ const ReviewsPage = () => {
                                             year: "numeric",
                                         })}
                                     </Typography>
+                                    {currentUser && currentUser.name === review.guest_name && (
+                                        <Box sx={{ mt: 2, display: "flex", gap: 2, alignItems: "center", justifyContent: "center" }}>
+                                            <Box>
+                                                <Button variant="contained"
+                                                    color="success"
+                                                    size="small"
+                                                    onClick={() => handleOpenEdit(review)}
+                                                    sx={{
+                                                        "&:focus": { outline: "none", boxShadow: "none" },
+                                                        "&:active": { outline: "none", boxShadow: "none" },
+                                                    }}>Edit</Button>
+                                                <Button variant="contained"
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => handleDelete(review.id)} sx={{
+                                                        marginLeft: '1rem', color: 'white',
+                                                        "&:focus": { outline: "none", boxShadow: "none" },
+                                                        "&:active": { outline: "none", boxShadow: "none" },
+                                                    }}>Delete</Button>
+                                            </Box>
+                                        </Box>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}
@@ -144,6 +248,36 @@ const ReviewsPage = () => {
                     </>
                 )}
             </Box>
+            <Dialog open={!!editingReview} onClose={handleCloseEdit}>
+                <DialogTitle>Edit Review</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body1">Rating</Typography>
+                        <Rating
+                            value={editRating}
+                            onChange={(e, newValue) => setEditRating(newValue)}
+                            size="large"
+                        />
+                    </Box>
+                    <TextField
+                        label="Comment"
+                        multiline
+                        rows={4}
+                        fullWidth
+                        value={editComment}
+                        onChange={(e) => setEditComment(e.target.value)}
+                        variant="outlined"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseEdit} sx={{
+                                                    "&:focus": { outline: "none", boxShadow: "none" },
+                                                    "&:active": { outline: "none", boxShadow: "none" }, }}>Cancel</Button>
+                    <Button onClick={handleSubmitEdit} variant="contained" color="primary" sx={{ 
+                                                    "&:focus": { outline: "none", boxShadow: "none" },
+                                                    "&:active": { outline: "none", boxShadow: "none" }, }}>Save</Button>
+                </DialogActions>
+            </Dialog>
             <Footer />
         </>
     );

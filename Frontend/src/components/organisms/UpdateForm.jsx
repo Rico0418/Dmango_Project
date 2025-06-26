@@ -118,7 +118,7 @@ const UpdateRoomForm = () => {
                     component="button"
                     variant="body1"
                     onClick={() => navigate("/admin/manage-rooms")}
-                    sx={{ display: "block", textAlign: "center", mt: 2 }}
+                    sx={{ display: "block", textAlign: "center", mt: 2, "&:focus": { outline: "none", boxShadow: "none" }, "&:active": { outline: "none", boxShadow: "none" } }}
                 >
                     Back to Rooms
                 </Link>
