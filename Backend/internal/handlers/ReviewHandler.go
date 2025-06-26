@@ -13,7 +13,7 @@ type ReviewHandler struct {
 	DB *pgxpool.Pool
 }
 func (h *ReviewHandler) GetAllReviews(c *gin.Context) {
-	query := `SELECT r.id, r.booking_id, rm.room_number, gh.name, r.guest_name, r.rating, r.comment, r.created_at FROM reviews r
+	query := `SELECT r.id, r.booking_id, rm.room_number, gh.name, r.guest_name, r.rating, r.comment, b.start_date, b.end_date, r.created_at FROM reviews r
 	INNER JOIN bookings b ON r.booking_id = b.id
 	INNER JOIN rooms rm ON b.room_id = rm.id
 	INNER JOIN guest_house gh ON rm.guest_house_id = gh.id`
@@ -30,7 +30,7 @@ func (h *ReviewHandler) GetAllReviews(c *gin.Context) {
 	for rows.Next() {
 		var review models.Review
 		if err := rows.Scan(&review.ID, &review.BookingID, &review.RoomNumber,
-			&review.GuestHouseName, &review.GuestName, &review.Rating, &review.Comment, &review.CreatedAt); err != nil {
+			&review.GuestHouseName, &review.GuestName, &review.Rating, &review.Comment, &review.StartDate, &review.EndDate, &review.CreatedAt); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
